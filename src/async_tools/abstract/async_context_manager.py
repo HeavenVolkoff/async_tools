@@ -1,8 +1,8 @@
-__all__ = ("AbstractAsyncContextManager",)
+__all__ = ("AsyncContextManager",)
 
 
 try:
-    from contextlib import AbstractAsyncContextManager  # type: ignore
+    from typing import AsyncContextManager  # type: ignore
 except ImportError:
     import typing as T
     from abc import ABCMeta, abstractmethod
@@ -10,10 +10,10 @@ except ImportError:
 
     K = T.TypeVar("K")
 
-    class AbstractAsyncContextManager(T.Generic[K], metaclass=ABCMeta):  # type: ignore
+    class AsyncContextManager(T.Generic[K], metaclass=ABCMeta):  # type: ignore
         """An abstract base class for asynchronous context managers."""
 
-        async def __aenter__(self) -> T.Union[K, "AbstractAsyncContextManager[K]"]:
+        async def __aenter__(self) -> T.Union[K, "AsyncContextManager[K]"]:
             """Return `self` upon entering the runtime context."""
             return self
 
