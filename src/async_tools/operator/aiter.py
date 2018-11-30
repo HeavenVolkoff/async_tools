@@ -6,18 +6,29 @@ __all__ = ("aiter",)
 import typing as T
 
 # Generic Types
-K = T.TypeVar["K"]
+K = T.TypeVar("K")
 
 _NOT_PROVIDED = object()  # sentinel object to detect when a kwarg was not given
 
 
+@T.overload
+def aiter(iterable: T.AsyncIterable[K]) -> T.AsyncIterator[K]:
+    ...
+
+
+@T.overload
+def aiter(iterable: T.Callable[[], T.Awaitable[K]], sentinel: T.Any) -> T.AsyncIterator[K]:
+    ...
+
+
 def aiter(
-    obj: T.Union[T.AsyncIterable[K], T.Callable[[], T.Awaitable[K]]], sentinel=_NOT_PROVIDED
+    iterable: T.Union[T.AsyncIterable[K], T.Callable[[], T.Awaitable[K]]],
+    sentinel: T.Any = _NOT_PROVIDED,
 ) -> T.AsyncIterator[K]:
     """Like the iter() builtin but for async iterables and callables.
 
     Arguments:
-        obj: AsyncIterable or Callable
+        iterable: AsyncIterable or Callable
         sentinel: Condition for callable iterator to stop
 
     Raises:
@@ -27,20 +38,20 @@ def aiter(
 
     """
     if sentinel is _NOT_PROVIDED:
-        if not isinstance(obj, T.AsyncIterable):
-            raise TypeError(f"aiter expected an AsyncIterable, got {type(obj)}")
+        if not isinstance(iterable, T.AsyncIterable):
+            raise TypeError(f"aiter expected an AsyncIterable, got {type(iterable)}")
 
-        if isinstance(obj, T.AsyncIterator):
-            return obj
+        if isinstance(iterable, T.AsyncIterator):
+            return iterable
 
-        return (i async for i in obj)
+        return iterable.__aiter__()
 
-    if not callable(obj):
-        raise TypeError(f"aiter expected an async callable, got {type(obj)}")
+    if not callable(iterable):
+        raise TypeError(f"aiter expected an async callable, got {type(iterable)}")
 
-    async def ait():
+    async def ait() -> T.AsyncIterator[K]:
         while True:
-            value = await obj()
+            value = await T.cast(T.Callable[[], T.Awaitable[K]], iterable)()
             if value == sentinel:
                 break
             yield value

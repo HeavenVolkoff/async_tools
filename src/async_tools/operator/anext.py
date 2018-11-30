@@ -6,13 +6,25 @@ __all__ = ("anext",)
 import typing as T
 
 # Generic Types
-K = T.TypeVar["K"]
-L = T.TypeVar["L"]
+K = T.TypeVar("K")
+L = T.TypeVar("L")
 
 _NOT_PROVIDED = object()  # sentinel object to detect when a kwarg was not given
 
 
-async def anext(async_iterator: T.AsyncIterator[K], default: L = _NOT_PROVIDED) -> T.Union[K, L]:
+@T.overload
+async def anext(async_iterator: T.AsyncIterator[K]) -> K:
+    ...
+
+
+@T.overload
+async def anext(async_iterator: T.AsyncIterator[K], default: L) -> T.Union[K, L]:
+    ...
+
+
+async def anext(
+    async_iterator: T.AsyncIterator[K], default: T.Union[L, object] = _NOT_PROVIDED
+) -> T.Union[K, L, object]:
     """Return the next item from the async iterator.
 
     Arguments:
@@ -30,4 +42,5 @@ async def anext(async_iterator: T.AsyncIterator[K], default: L = _NOT_PROVIDED) 
     except StopAsyncIteration:
         if default is _NOT_PROVIDED:
             raise
+
         return default

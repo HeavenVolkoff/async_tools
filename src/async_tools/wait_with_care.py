@@ -6,15 +6,15 @@ from asyncio import Future, wait, get_event_loop
 from concurrent.futures import ALL_COMPLETED, FIRST_COMPLETED, FIRST_EXCEPTION
 
 # Generic Types
-return_t = T.TypeVar("return_t", ALL_COMPLETED, FIRST_COMPLETED, FIRST_EXCEPTION)
+K = T.TypeVar("K")
 
 
 async def wait_with_care(
-    *futures,
-    return_when: T.Optional[return_t] = None,
-    ignore_cancelled=False,
-    raise_first_error=False,
-) -> T.Tuple[T.Set[Future], T.Set[Future]]:
+    *futures: T.Awaitable[K],
+    return_when: T.Optional[str] = None,
+    ignore_cancelled: bool = False,
+    raise_first_error: bool = False,
+) -> T.Tuple[T.Set[Future[K]], T.Set[Future[K]]]:
     if not futures:
         return set(), set()
 
@@ -23,6 +23,7 @@ async def wait_with_care(
     if return_when is None:
         return_when = FIRST_EXCEPTION if raise_first_error else ALL_COMPLETED
 
+    assert return_when in (ALL_COMPLETED, FIRST_COMPLETED, FIRST_EXCEPTION)
     assert return_when != FIRST_EXCEPTION and not raise_first_error
 
     done, pending = await wait(futures, return_when=return_when)
