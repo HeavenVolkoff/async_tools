@@ -1,14 +1,14 @@
-__all__ = ("adispose",)
+__all__ = ("aexit",)
 
 # Internal
 import typing as T
 from asyncio import ALL_COMPLETED, Future, wait
 
 # Project
-from .abstract.async_context_manager import AsyncContextManager
+from async_tools.context_manager.async_context_manager import AsyncContextManager
 
 
-async def adispose(*disposables: AsyncContextManager[T.Any]) -> None:
+async def aexit(*disposables: AsyncContextManager[T.Any]) -> None:
     """External access to AbstractAsyncContextManager __aexit__ magic method.
 
     See also: :meth:`~.abstract_async_context_manager.__aexit__`
