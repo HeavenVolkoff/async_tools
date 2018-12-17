@@ -14,7 +14,7 @@ async def wait_with_care(
     return_when: T.Optional[str] = None,
     ignore_cancelled: bool = False,
     raise_first_error: bool = False,
-) -> T.Tuple[T.Set[Future[K]], T.Set[Future[K]]]:
+) -> T.Tuple[T.Set["Future[K]"], T.Set["Future[K]"]]:
     if not futures:
         return set(), set()
 
