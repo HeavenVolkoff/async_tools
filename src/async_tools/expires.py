@@ -6,14 +6,11 @@ See original license in:
     https://raw.githubusercontent.com/aio-libs/async-timeout/3b295845d830357fbcf99b0acd55708e44a0e3ac/LICENSE
 """
 
-__all__ = ("auto_timeout", "expires")
-
 # Internal
 import typing as T
 from types import TracebackType
 from asyncio import Task, Handle, TimeoutError, CancelledError
 from weakref import ReferenceType
-from contextlib import AbstractContextManager
 
 # Project
 from .current_task import current_task
@@ -210,3 +207,6 @@ class expires(T.ContextManager["expires"], Loopable):
         self.__exit__(None, None, None)
         self._task = ReferenceType(task)
         self.__enter__()
+
+
+__all__ = ("auto_timeout", "expires")

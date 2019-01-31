@@ -1,4 +1,4 @@
-__all__ = ("AbstractAsyncContextManager",)
+__all__ = ("AsyncContextManager",)
 
 # Internal
 import typing as T
@@ -6,7 +6,7 @@ from abc import ABCMeta, abstractmethod
 from types import TracebackType
 
 
-class AbstractAsyncContextManager(metaclass=ABCMeta):
+class AsyncContextManager(metaclass=ABCMeta):
     @abstractmethod
     async def __aenter__(self,) -> T.Any:
         raise NotImplementedError

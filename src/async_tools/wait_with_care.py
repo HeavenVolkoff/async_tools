@@ -1,5 +1,3 @@
-__all__ = ("wait_with_care", "ALL_COMPLETED", "FIRST_COMPLETED", "FIRST_EXCEPTION")
-
 # Internal
 import typing as T
 from asyncio import Future, wait, get_event_loop
@@ -47,3 +45,6 @@ async def wait_with_care(
             )
 
     return done, pending
+
+
+__all__ = ("wait_with_care", "ALL_COMPLETED", "FIRST_COMPLETED", "FIRST_EXCEPTION")

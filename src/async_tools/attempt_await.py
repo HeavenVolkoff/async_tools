@@ -1,5 +1,3 @@
-__all__ = ("attempt_await",)
-
 # Internal
 import typing as T
 
@@ -17,3 +15,6 @@ async def attempt_await(awaitable: T.Union[K, T.Awaitable[K]], loop: AbstractEve
         return T.cast(K, awaitable)  # Not an awaitable
     else:
         return await result_fut
+
+
+__all__ = ("attempt_await",)

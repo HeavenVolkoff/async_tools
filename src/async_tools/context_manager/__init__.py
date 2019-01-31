@@ -1,5 +1,7 @@
-__all__ = ("aclosing", "AbstractAsyncContextManager")
+# External
+from async_tools.abstract import AsyncContextManager
 
 # Project
 from .async_generator_close_context import AsyncGeneratorCloseContext as aclosing
-from .abstract_async_context_manager import AbstractAsyncContextManager
+
+__all__ = ("aclosing", "AsyncContextManager")

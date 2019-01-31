@@ -1,6 +1,6 @@
-# modified from: https://github.com/python/cpython/pull/8895
-
-__all__ = ("anext",)
+"""
+Modified from: https://github.com/python/cpython/pull/8895
+"""
 
 # Internal
 import typing as T
@@ -44,3 +44,6 @@ async def anext(
             raise
 
         return default
+
+
+__all__ = ("anext",)

@@ -1,6 +1,6 @@
-# modified from: https://github.com/python/cpython/pull/8895
-
-__all__ = ("aiter",)
+"""
+Modified from: https://github.com/python/cpython/pull/8895
+"""
 
 # Internal
 import typing as T
@@ -57,3 +57,6 @@ def aiter(
             yield value
 
     return ait()
+
+
+__all__ = ("aiter",)
