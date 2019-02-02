@@ -13,8 +13,8 @@ from asyncio import Task, Handle, TimeoutError, CancelledError
 from weakref import ReferenceType
 
 # Project
+from .loopable import Loopable
 from .current_task import current_task
-from .abstract.loopable import Loopable
 
 # Typing helper
 Number = T.Union[int, float]

@@ -5,7 +5,7 @@ import pkg_resources
 
 # Project
 from .expires import expires, auto_timeout
-from .Loopable import Loopable
+from .loopable import Loopable
 from .all_tasks import all_tasks
 from .current_task import current_task
 from .attempt_await import attempt_await
