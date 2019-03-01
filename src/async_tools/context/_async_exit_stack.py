@@ -202,7 +202,7 @@ class AsyncExitStack(_BaseExitStack, T.AsyncContextManager["AsyncExitStack"]):
                     exc_type, exc_value, traceback = (None, None, None)
             except BaseException:
                 new_exc_details = sys.exc_info()
-                assert isinstance(new_exc_details, BaseException)
+                assert isinstance(new_exc_details[1], BaseException)
                 # simulate the stack of exceptions by setting the context
                 _fix_exception_context(new_exc_details[1], exc_value, frame_exc)
                 pending_raise = True
