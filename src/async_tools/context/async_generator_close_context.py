@@ -3,16 +3,13 @@ __all__ = ("AsyncGeneratorCloseContext",)
 # Internal
 import typing as T
 
-# External
-from async_tools.abstract import AsyncContextManager
-
 # Generic Types
 K = T.TypeVar("K")
 L = T.TypeVar("L")
 
 
 # noinspection PyPep8Naming
-class AsyncGeneratorCloseContext(T.Generic[K, L], AsyncContextManager):
+class AsyncGeneratorCloseContext(T.Generic[K, L], T.AsyncContextManager[T.AsyncGenerator[K, L]]):
     def __init__(self, aiter: T.AsyncGenerator[K, L]) -> None:
         self._aiter = aiter
 

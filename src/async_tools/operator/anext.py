@@ -13,17 +13,17 @@ _NOT_PROVIDED = object()  # sentinel object to detect when a kwarg was not given
 
 
 @T.overload
-async def anext(async_iterator: T.AsyncIterator[K]) -> K:
+async def anext(async_iterator: T.AsyncGenerator[K, T.Any]) -> K:
     ...
 
 
 @T.overload
-async def anext(async_iterator: T.AsyncIterator[K], default: L) -> T.Union[K, L]:
+async def anext(async_iterator: T.AsyncGenerator[K, T.Any], default: L) -> T.Union[K, L]:
     ...
 
 
 async def anext(
-    async_iterator: T.AsyncIterator[K], default: T.Union[L, object] = _NOT_PROVIDED
+    async_iterator: T.AsyncGenerator[K, T.Any], default: T.Union[L, object] = _NOT_PROVIDED
 ) -> T.Union[K, L, object]:
     """Return the next item from the async iterator.
 

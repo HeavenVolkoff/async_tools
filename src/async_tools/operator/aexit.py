@@ -2,11 +2,8 @@
 import typing as T
 from asyncio import ALL_COMPLETED, Future, wait
 
-# Project
-from ..context_manager import AsyncContextManager
 
-
-async def aexit(*disposables: T.Union[T.AsyncContextManager[T.Any], AsyncContextManager]) -> None:
+async def aexit(*disposables: T.AsyncContextManager[T.Any]) -> None:
     """External access to AbstractAsyncContextManager __aexit__ magic method.
 
     See also: :meth:`~.abstract_async_context_manager.__aexit__`
