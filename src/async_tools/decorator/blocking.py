@@ -8,25 +8,15 @@ See original licenses in:
 
 # Internal
 import typing as T
-from functools import wraps
-from concurrent.futures import Executor
+from functools import wraps, partial
 from concurrent.futures.process import ProcessPoolExecutor
 
 # Project
-from ..operator import anext
+from ..at_loop_exit import at_loop_exit
 from ._from_coroutine import _from_coroutine
 from ..get_running_loop import get_running_loop
 
 _default_executor: T.Optional[ProcessPoolExecutor] = None
-
-
-async def _schedule_default_executor_cleanup(executor: Executor) -> T.AsyncGenerator[None, None]:
-    try:
-        yield
-    except GeneratorExit:
-        pass
-    finally:
-        executor.shutdown(wait=False)
 
 
 def thread(func: T.Callable[..., T.Any]) -> T.Callable[..., T.Any]:
@@ -69,7 +59,7 @@ def process(func: T.Callable[..., T.Any]) -> T.Callable[..., T.Any]:
 
             if _default_executor is None:
                 _default_executor = ProcessPoolExecutor()
-                loop.create_task(anext(_schedule_default_executor_cleanup(_default_executor)))
+                at_loop_exit(partial(_default_executor.shutdown, wait=False))
 
             if kwargs:
                 return loop.run_in_executor(_default_executor, lambda: func(*args, **kwargs))
