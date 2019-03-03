@@ -12,7 +12,7 @@ from functools import wraps, partial
 from concurrent.futures.process import ProcessPoolExecutor
 
 # Project
-from ..at_loop_exit import at_loop_exit
+from ..at_loop_shutdown import at_loop_shutdown
 from ._from_coroutine import _from_coroutine
 from ..get_running_loop import get_running_loop
 
@@ -59,7 +59,7 @@ def process(func: T.Callable[..., T.Any]) -> T.Callable[..., T.Any]:
 
             if _default_executor is None:
                 _default_executor = ProcessPoolExecutor()
-                at_loop_exit(partial(_default_executor.shutdown, wait=False))
+                at_loop_shutdown(partial(_default_executor.shutdown, wait=False))
 
             if kwargs:
                 return loop.run_in_executor(_default_executor, lambda: func(*args, **kwargs))

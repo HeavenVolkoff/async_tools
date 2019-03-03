@@ -7,6 +7,7 @@ import pkg_resources
 from .expires import Expires as expires
 from .loopable import Loopable
 from .all_tasks import all_tasks
+from .at_loop_shutdown import at_loop_shutdown
 from .current_task import current_task
 from .attempt_await import attempt_await
 from .wait_with_care import ALL_COMPLETED, FIRST_COMPLETED, FIRST_EXCEPTION, wait_with_care
@@ -24,6 +25,7 @@ __all__ = (
     "expires",
     "Loopable",
     "all_tasks",
+    "at_loop_shutdown",
     "current_task",
     "attempt_await",
     "ALL_COMPLETED",
