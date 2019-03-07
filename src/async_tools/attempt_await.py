@@ -8,7 +8,17 @@ K = T.TypeVar("K")
 L = T.TypeVar("L")
 
 
-async def attempt_await(awaitable: T.Union[K, T.Awaitable[K]], loop: AbstractEventLoop) -> K:
+@T.overload
+async def attempt_await(awaitable: T.Awaitable[K], loop: AbstractEventLoop) -> K:
+    ...
+
+
+@T.overload
+async def attempt_await(awaitable: K, loop: AbstractEventLoop) -> K:
+    ...
+
+
+async def attempt_await(awaitable: T.Any, loop: AbstractEventLoop) -> K:
     try:
         result_fut = ensure_future(T.cast(T.Awaitable[K], awaitable), loop=loop)
     except TypeError:

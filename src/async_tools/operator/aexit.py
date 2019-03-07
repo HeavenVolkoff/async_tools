@@ -19,7 +19,7 @@ async def aexit(*disposables: T.AsyncContextManager[T.Any]) -> None:
             for disposable in disposables
         ),
         return_when=ALL_COMPLETED,
-    )  # type: T.Set[Future[bool]], T.Set[Future[bool]]
+    )  # type: T.Tuple[T.Set[Future[bool]], T.Set[Future[bool]]]
 
     assert not pending
 

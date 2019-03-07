@@ -53,7 +53,9 @@ class _BaseExitStack:
     """A base class for ExitStack and AsyncExitStack."""
 
     @staticmethod
-    def _create_cb_wrapper(callback: M, *args: T.Any, **kwargs: T.Any) -> EXIT_CALLBACK_t:
+    def _create_cb_wrapper(
+        callback: T.Callable[..., T.Any], *args: T.Any, **kwargs: T.Any
+    ) -> EXIT_CALLBACK_t:
         def _exit_wrapper(_: T.Any, __: T.Any, ___: T.Any) -> bool:
             callback(*args, **kwargs)
             return False
@@ -160,7 +162,7 @@ class AsyncExitStack(_BaseExitStack, T.AsyncContextManager["AsyncExitStack"]):
 
     @staticmethod
     def _create_async_cb_wrapper(
-        callback: N, *args: T.Any, **kwargs: T.Any
+        callback: T.Callable[..., T.Coroutine[T.Any, T.Any, T.Any]], *args: T.Any, **kwargs: T.Any
     ) -> ASYNC_EXIT_CALLBACK_t:
         async def _exit_wrapper(_: T.Any, __: T.Any, ___: T.Any) -> bool:
             await callback(*args, **kwargs)
