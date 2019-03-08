@@ -9,10 +9,10 @@ See original licenses in:
 # Internal
 import asyncio
 import unittest
-from test.test_contextlib import TestBaseExitStack
 
 # External
 from tests.misc import _async_test
+from tests.base_exit_stack import TestBaseExitStack
 from async_tools.context._async_exit_stack import AsyncExitStack
 
 
