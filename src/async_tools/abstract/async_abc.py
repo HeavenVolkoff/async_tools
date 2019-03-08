@@ -28,7 +28,11 @@ class AsyncABCMeta(Meta):
     coroutine in any child.
     """
 
-    def __init__(cls, name: str, bases: T.Tuple[type, ...], namespace: T.Dict[str, T.Any]):
+    def __init__(
+        cls, name: str, bases: T.Tuple[type, ...], namespace: T.Dict[str, T.Any], **kwargs
+    ):
+        super().__init__(name, bases, namespace, **kwargs)
+
         coros: T.Dict[str, T.Coroutine[T.Any, T.Any, T.Any]] = {}
         for base in reversed(cls.__mro__):
             coros.update(
