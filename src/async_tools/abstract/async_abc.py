@@ -9,13 +9,18 @@ See original licenses in:
 # Internal
 import typing as T
 import inspect
-from abc import ABCMeta
 
 # Project
 from ..is_coroutine_function import iscoroutinefunction
 
+try:
+    # Allow easy interoperability between typing generics and AsyncABCMeta on Python <= 3.6
+    from typing import GenericMeta as Meta
+except ImportError:
+    from abc import ABCMeta as Meta
 
-class AsyncABCMeta(ABCMeta):
+
+class AsyncABCMeta(Meta):
     """
     Metaclass that gives all of the features of an abstract base class, but
     additionally enforces coroutine correctness on subclasses. If any method
