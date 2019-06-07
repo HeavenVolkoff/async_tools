@@ -9,13 +9,18 @@ See original licenses in:
 # Internal
 import typing as T
 import inspect
-from abc import ABCMeta
 
 # Project
 from ..is_coroutine_function import iscoroutinefunction
 
+try:
+    # Allow easy interoperability between typing generics and AsyncABCMeta on Python <= 3.6
+    from typing import GenericMeta as Meta
+except ImportError:
+    from abc import ABCMeta as Meta
 
-class AsyncABCMeta(ABCMeta):
+
+class AsyncABCMeta(Meta):
     """
     Metaclass that gives all of the features of an abstract base class, but
     additionally enforces coroutine correctness on subclasses. If any method
@@ -23,7 +28,11 @@ class AsyncABCMeta(ABCMeta):
     coroutine in any child.
     """
 
-    def __init__(cls, name: str, bases: T.Tuple[type, ...], namespace: T.Dict[str, T.Any]):
+    def __init__(
+        cls, name: str, bases: T.Tuple[type, ...], namespace: T.Dict[str, T.Any], **kwargs
+    ):
+        super().__init__(name, bases, namespace, **kwargs)
+
         coros: T.Dict[str, T.Coroutine[T.Any, T.Any, T.Any]] = {}
         for base in reversed(cls.__mro__):
             coros.update(
