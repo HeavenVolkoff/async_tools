@@ -5,7 +5,6 @@ import typing as T
 from asyncio import AbstractEventLoop, ensure_future
 
 K = T.TypeVar("K")
-L = T.TypeVar("L")
 
 
 @T.overload

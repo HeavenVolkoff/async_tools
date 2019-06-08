@@ -11,6 +11,7 @@ import typing as T
 from types import TracebackType
 from functools import wraps
 
+# Type Generics
 K = T.TypeVar("K")
 
 

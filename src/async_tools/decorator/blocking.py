@@ -12,14 +12,17 @@ from functools import wraps, partial
 from concurrent.futures.process import ProcessPoolExecutor
 
 # Project
-from ..at_loop_shutdown import at_loop_shutdown
 from ._from_coroutine import _from_coroutine
+from ..at_loop_shutdown import at_loop_shutdown
 from ..get_running_loop import get_running_loop
+
+# Type Generics
+K = T.TypeVar("K")
 
 _default_executor: T.Optional[ProcessPoolExecutor] = None
 
 
-def thread(func: T.Callable[..., T.Any]) -> T.Callable[..., T.Any]:
+def thread(func: T.Callable[..., K]) -> T.Callable[..., K]:
     """
     Decorator indicating that a function performs a blocking operation.
     If called from synchronous Python code, the function runs normally.
@@ -42,7 +45,7 @@ def thread(func: T.Callable[..., T.Any]) -> T.Callable[..., T.Any]:
     return wrapper
 
 
-def process(func: T.Callable[..., T.Any]) -> T.Callable[..., T.Any]:
+def process(func: T.Callable[..., K]) -> T.Callable[..., K]:
     """
     Decorator indicating that a function performs a blocking operation.
     If called from synchronous Python code, the function runs normally.

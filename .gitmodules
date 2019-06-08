@@ -1,0 +1,3 @@
+[submodule "tools/format.sh"]
+	path = tools/format.sh
+	url = https://github.com/HeavenVolkoff/format.sh.git

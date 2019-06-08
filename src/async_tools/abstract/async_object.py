@@ -10,10 +10,13 @@ See original licenses in:
 import typing as T
 import inspect
 
+# External
+import typing_extensions as Te
+
 # Project
 from .async_abc import AsyncABCMeta
 
-K = T.TypeVar("K", bound="AsyncObjectMeta")
+K = T.TypeVar("K")
 
 
 class AsyncObjectMeta(AsyncABCMeta):
@@ -31,7 +34,7 @@ class AsyncObjectMeta(AsyncABCMeta):
 
     @staticmethod
     def __new__(
-        mcs: T.Type["AsyncObjectMeta"],
+        mcs: Te.Type["AsyncObjectMeta"],
         name: str,
         bases: T.Tuple[type, ...],
         namespace: T.Dict[str, T.Any],
@@ -41,7 +44,7 @@ class AsyncObjectMeta(AsyncABCMeta):
         return super().__new__(mcs, name, bases, namespace)  # type: ignore
 
     async def __call__(cls: K, *args: T.Any, **kwargs: T.Any) -> K:
-        self = T.cast(K, cls.__new__(type(cls), *args, **kwargs))
+        self: K = cls.__new__(cls, *args, **kwargs)  # type: ignore
         await self.__init__(*args, **kwargs)  # type: ignore
         return self
 
