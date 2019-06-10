@@ -44,7 +44,7 @@ class AsyncABCMeta(Meta):
 
         for name, val in vars(cls).items():
             if name in coros and not iscoroutinefunction(val):
-                raise TypeError("Must use async def %s%s" % (name, inspect.signature(val)))
+                raise TypeError("Must use async def {}{}".format(name, inspect.signature(val)))
 
         super().__init__(name, bases, namespace)
 

@@ -293,7 +293,7 @@ class AsyncExitStack(_BaseExitStack, Te.AsyncContextManager["AsyncExitStack"]):
         else:
             raise TypeError(
                 "push_async_callback expected at least 1 "
-                "positional argument, got %d" % (len(args) - 1)
+                "positional argument, got {}".format(len(args) - 1)
             )
 
         _exit_wrapper = self._create_async_cb_wrapper(callback, *args, **kwargs)

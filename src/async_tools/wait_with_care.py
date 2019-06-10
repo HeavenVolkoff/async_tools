@@ -42,7 +42,9 @@ async def wait_with_care(
 
             loop.call_exception_handler(
                 {
-                    "message": f"Exception was raised while waiting {type(fut).__qualname__}",
+                    "message": "Exception was raised while waiting {}".format(
+                        type(fut).__qualname__
+                    ),
                     "exception": exc,
                 }
             )
