@@ -47,7 +47,12 @@ def aiter(
         if isinstance(iterable, Te.AsyncIterator):
             return iterable
 
-        return (i async for i in iterable)
+        async def to_aiter() -> Te.AsyncGenerator[K, None]:
+            assert isinstance(iterable, Te.AsyncIterable)
+            async for i in iterable:
+                yield i
+
+        return to_aiter()
 
     async def ait() -> Te.AsyncIterator[K]:
         if not callable(iterable):
