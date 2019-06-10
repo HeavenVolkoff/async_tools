@@ -42,7 +42,7 @@ def aiter(
     """
     if sentinel is _NOT_PROVIDED:
         if not isinstance(iterable, Te.AsyncIterable):
-            raise TypeError("aiter expected an AsyncIterable, got {}".format(type(iterable)))
+            raise TypeError(f"aiter expected an AsyncIterable, got {type(iterable)}")
 
         if isinstance(iterable, Te.AsyncIterator):
             return iterable
@@ -56,7 +56,7 @@ def aiter(
 
     async def ait() -> Te.AsyncIterator[K]:
         if not callable(iterable):
-            raise TypeError("aiter expected an async callable, got {}".format(type(iterable)))
+            raise TypeError(f"aiter expected an async callable, got {type(iterable)}")
 
         while True:
             value = await iterable()

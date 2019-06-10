@@ -36,7 +36,7 @@ async def anext(
 
     """
     if not isinstance(async_iterator, Te.AsyncIterator):
-        raise TypeError("anext expected an AsyncIterator, got {}".format(type(async_iterator)))
+        raise TypeError(f"anext expected an AsyncIterator, got {type(async_iterator)}")
 
     async_next = async_iterator.__anext__
 

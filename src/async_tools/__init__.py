@@ -20,7 +20,7 @@ except Exception:
     import traceback
     from warnings import warn
 
-    warn("Failed to set version due to:\n{}".format(traceback.format_exc()), ImportWarning)
+    warn(f"Failed to set version due to:\n{traceback.format_exc()}", ImportWarning)
     __version__ = "0.0a0"
 
 
