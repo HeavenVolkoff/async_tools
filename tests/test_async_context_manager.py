@@ -140,7 +140,7 @@ class AsyncContextManagerTestCase(asynctest.TestCase, unittest.TestCase):
                 except Exception as ex:
                     self.assertIs(ex, stop_exc)
                 else:
-                    self.fail(f"{stop_exc} was suppressed")
+                    self.fail("{} was suppressed".format(stop_exc))
 
     async def test_contextmanager_wrap_runtimeerror(self):
         @asynccontextmanager
@@ -148,7 +148,7 @@ class AsyncContextManagerTestCase(asynctest.TestCase, unittest.TestCase):
             try:
                 yield
             except Exception as exc:
-                raise RuntimeError(f"caught {exc}") from exc
+                raise RuntimeError("caught {}".format(exc)) from exc
 
         with self.assertRaises(RuntimeError):
             async with woohoo():
