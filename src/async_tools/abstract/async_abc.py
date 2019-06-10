@@ -10,6 +10,9 @@ See original licenses in:
 import typing as T
 import inspect
 
+# External
+import typing_extensions as Te
+
 # Project
 from ..is_coroutine_function import iscoroutinefunction
 
@@ -33,7 +36,7 @@ class AsyncABCMeta(Meta):
     ) -> None:
         super().__init__(name, bases, namespace, **kwargs)  # type: ignore
 
-        coros: T.Dict[str, T.Coroutine[T.Any, T.Any, T.Any]] = {}
+        coros: T.Dict[str, Te.Coroutine[T.Any, T.Any, T.Any]] = {}
         for base in reversed(cls.__mro__):
             coros.update(
                 (name, val) for name, val in vars(base).items() if iscoroutinefunction(val)

@@ -15,16 +15,16 @@ from collections import deque
 # External
 import typing_extensions as Te
 
-# Type Generics
+# Generic types
 L = T.TypeVar("L")
 M = T.TypeVar("M", bound=T.Callable[..., T.Any])
-N = T.TypeVar("N", bound=T.Callable[..., T.Coroutine[T.Any, T.Any, T.Any]])
+N = T.TypeVar("N", bound=T.Callable[..., Te.Coroutine[T.Any, T.Any, T.Any]])
 
 
 class ExitCallback(Te.Protocol):
     def __call__(
         self,
-        exc_type: T.Optional[T.Type[BaseException]],
+        exc_type: T.Optional[Te.Type[BaseException]],
         exc_value: T.Optional[BaseException],
         traceback: T.Optional[TracebackType],
     ) -> T.Optional[bool]:
@@ -39,7 +39,7 @@ class SupportsExit(Te.Protocol):
 class AsyncExitCallback(Te.Protocol):
     async def __call__(
         self,
-        exc_type: T.Optional[T.Type[BaseException]],
+        exc_type: T.Optional[Te.Type[BaseException]],
         exc_value: T.Optional[BaseException],
         traceback: T.Optional[TracebackType],
     ) -> T.Optional[bool]:
@@ -65,7 +65,7 @@ class _BaseExitStack:
         return _exit_wrapper
 
     def __init__(self) -> None:
-        self._exit_callbacks: T.Deque[
+        self._exit_callbacks: Te.Deque[
             T.Tuple[bool, T.Union[ExitCallback, AsyncExitCallback]]
         ] = deque()
 
@@ -81,11 +81,11 @@ class _BaseExitStack:
         self._exit_callbacks = deque()
         return new_stack
 
-    @T.overload
+    @Te.overload
     def push(self, exit_cb: ExitCallback) -> ExitCallback:
         ...
 
-    @T.overload
+    @Te.overload
     def push(self, exit_cb: SupportsExit) -> SupportsExit:
         ...
 
@@ -152,7 +152,7 @@ def _fix_exception_context(
     new_exc.__context__ = old_exc
 
 
-class AsyncExitStack(_BaseExitStack, T.AsyncContextManager["AsyncExitStack"]):
+class AsyncExitStack(_BaseExitStack, Te.AsyncContextManager["AsyncExitStack"]):
     """Async context manager for dynamic management of a stack of exit
     callbacks.
     For example:
@@ -166,7 +166,7 @@ class AsyncExitStack(_BaseExitStack, T.AsyncContextManager["AsyncExitStack"]):
 
     @staticmethod
     def _create_async_cb_wrapper(
-        callback: T.Callable[..., T.Coroutine[T.Any, T.Any, T.Any]], *args: T.Any, **kwargs: T.Any
+        callback: T.Callable[..., Te.Coroutine[T.Any, T.Any, T.Any]], *args: T.Any, **kwargs: T.Any
     ) -> AsyncExitCallback:
         async def _exit_wrapper(exc_type: T.Any, exc_value: T.Any, traceback: T.Any) -> bool:
             await callback(*args, **kwargs)
@@ -179,7 +179,7 @@ class AsyncExitStack(_BaseExitStack, T.AsyncContextManager["AsyncExitStack"]):
 
     async def __aexit__(
         self,
-        exc_type: T.Optional[T.Type[BaseException]],
+        exc_type: T.Optional[Te.Type[BaseException]],
         exc_value: T.Optional[BaseException],
         traceback: T.Optional[TracebackType],
     ) -> T.Optional[bool]:
@@ -199,10 +199,10 @@ class AsyncExitStack(_BaseExitStack, T.AsyncContextManager["AsyncExitStack"]):
             try:
                 cb_awaitable = cb(exc_type, exc_value, traceback)
                 if is_sync:
-                    assert not isinstance(cb_awaitable, T.Awaitable)
+                    assert not isinstance(cb_awaitable, Te.Awaitable)
                     cb_suppress = cb_awaitable
                 else:
-                    assert isinstance(cb_awaitable, T.Awaitable)
+                    assert isinstance(cb_awaitable, Te.Awaitable)
                     cb_suppress = await cb_awaitable
 
                 if cb_suppress:
@@ -230,7 +230,7 @@ class AsyncExitStack(_BaseExitStack, T.AsyncContextManager["AsyncExitStack"]):
 
         return received_exc and suppressed_exc
 
-    async def enter_async_context(self, cm: T.AsyncContextManager[L]) -> L:
+    async def enter_async_context(self, cm: Te.AsyncContextManager[L]) -> L:
         """Enters the supplied async context manager.
         If successful, also pushes its __aexit__ method as a callback and
         returns the result of the __aenter__ method.
@@ -240,11 +240,11 @@ class AsyncExitStack(_BaseExitStack, T.AsyncContextManager["AsyncExitStack"]):
         self._push_exit_callback(MethodType(cm_type.__aexit__, cm), False)
         return result
 
-    @T.overload
+    @Te.overload
     def push_async_exit(self, exit_cb: AsyncExitCallback) -> AsyncExitCallback:
         ...
 
-    @T.overload
+    @Te.overload
     def push_async_exit(self, exit_cb: SupportsAsyncExit) -> SupportsAsyncExit:
         ...
 

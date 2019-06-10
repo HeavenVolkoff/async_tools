@@ -3,12 +3,15 @@ import typing as T
 from asyncio import Future, wait, get_event_loop
 from concurrent.futures import ALL_COMPLETED, FIRST_COMPLETED, FIRST_EXCEPTION
 
-# Generic Types
+# External
+import typing_extensions as Te
+
+# Generic types
 K = T.TypeVar("K")
 
 
 async def wait_with_care(
-    *futures: T.Awaitable[K],
+    *futures: Te.Awaitable[K],
     return_when: T.Optional[str] = None,
     ignore_cancelled: bool = False,
     raise_first_error: bool = False,

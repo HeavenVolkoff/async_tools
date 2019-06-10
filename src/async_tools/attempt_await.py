@@ -1,25 +1,27 @@
 # Internal
 import typing as T
-
-# Generic Types
 from asyncio import AbstractEventLoop, ensure_future
 
+# External
+import typing_extensions as Te
+
+# Generic types
 K = T.TypeVar("K")
 
 
-@T.overload
-async def attempt_await(awaitable: T.Awaitable[K], loop: AbstractEventLoop) -> K:
+@Te.overload
+async def attempt_await(awaitable: Te.Awaitable[K], loop: AbstractEventLoop) -> K:
     ...
 
 
-@T.overload
+@Te.overload
 async def attempt_await(awaitable: K, loop: AbstractEventLoop) -> K:
     ...
 
 
-async def attempt_await(awaitable: T.Any, loop: AbstractEventLoop) -> K:
+async def attempt_await(awaitable: T.Union[Te.Awaitable[K], K], loop: AbstractEventLoop) -> K:
     try:
-        result_fut = ensure_future(T.cast(T.Awaitable[K], awaitable), loop=loop)
+        result_fut = ensure_future(T.cast(Te.Awaitable[K], awaitable), loop=loop)
     except TypeError:
         return T.cast(K, awaitable)  # Not an awaitable
     else:

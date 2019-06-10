@@ -5,19 +5,22 @@ Modified from: https://github.com/python/cpython/pull/8895
 # Internal
 import typing as T
 
-# Generic Types
+# External
+import typing_extensions as Te
+
+# Generic types
 K = T.TypeVar("K")
 L = T.TypeVar("L")
 
 _NOT_PROVIDED = object()  # sentinel object to detect when a kwarg was not given
 
 
-@T.overload
+@Te.overload
 async def anext(async_iterator: T.AsyncGenerator[K, T.Any]) -> K:
     ...
 
 
-@T.overload
+@Te.overload
 async def anext(async_iterator: T.AsyncGenerator[K, T.Any], default: L) -> T.Union[K, L]:
     ...
 
@@ -32,7 +35,7 @@ async def anext(
         default: Default parameter to be returned instead of raising StopAsyncIteration.
 
     """
-    if not isinstance(async_iterator, T.AsyncIterator):
+    if not isinstance(async_iterator, Te.AsyncIterator):
         raise TypeError(f"anext expected an AsyncIterator, got {type(async_iterator)}")
 
     async_next = async_iterator.__anext__

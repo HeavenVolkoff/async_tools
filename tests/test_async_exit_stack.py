@@ -7,56 +7,15 @@ See original licenses in:
 """
 
 # Internal
-import asyncio
 import unittest
 
 # External
-from tests.misc import _async_test
-from tests.base_exit_stack import TestBaseExitStack
+import asynctest
 from async_tools.context._async_exit_stack import AsyncExitStack
 
 
-class TestAsyncExitStack(TestBaseExitStack, unittest.TestCase):
-    class SyncAsyncExitStack(AsyncExitStack):
-        @staticmethod
-        def run_coroutine(coro):
-            loop = asyncio.get_event_loop()
-
-            f = asyncio.ensure_future(coro)
-            f.add_done_callback(lambda f: loop.stop())
-            loop.run_forever()
-
-            exc = f.exception()
-
-            if not exc:
-                return f.result()
-            else:
-                context = exc.__context__
-
-                try:
-                    raise exc
-                except:
-                    exc.__context__ = context
-                    raise exc
-
-        def close(self):
-            return self.run_coroutine(self.aclose())
-
-        def __enter__(self):
-            return self.run_coroutine(self.__aenter__())
-
-        def __exit__(self, *exc_details):
-            return self.run_coroutine(self.__aexit__(*exc_details))
-
-    exit_stack = SyncAsyncExitStack
-
-    def setUp(self):
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self.loop)
-        self.addCleanup(self.loop.close)
-        self.addCleanup(asyncio.set_event_loop_policy, None)
-
-    @_async_test
+@asynctest.strict
+class TestAsyncExitStack(asynctest.TestCase, unittest.TestCase):
     async def test_async_callback(self):
         expected = [
             ((), {}),
@@ -95,12 +54,11 @@ class TestAsyncExitStack(TestBaseExitStack, unittest.TestCase):
             with self.assertRaises(TypeError):
                 stack.push_async_callback(arg=1)
             with self.assertRaises(TypeError):
-                self.exit_stack.push_async_callback(arg=2)
+                stack.push_async_callback(arg=2)
             with self.assertWarns(DeprecationWarning):
                 stack.push_async_callback(callback=_exit, arg=3)
         self.assertEqual(result, [((), {"arg": 3})])
 
-    @_async_test
     async def test_async_push(self):
         exc_raised = ZeroDivisionError
 
@@ -125,7 +83,7 @@ class TestAsyncExitStack(TestBaseExitStack, unittest.TestCase):
             async def __aexit__(self, *exc_details):
                 await self.check_exc(*exc_details)
 
-        async with self.exit_stack() as stack:
+        async with AsyncExitStack() as stack:
             stack.push_async_exit(_expect_ok)
             self.assertIs(stack._exit_callbacks[-1][1], _expect_ok)
             cm = ExitCM(_expect_ok)
@@ -142,7 +100,6 @@ class TestAsyncExitStack(TestBaseExitStack, unittest.TestCase):
             self.assertIs(stack._exit_callbacks[-1][1], _expect_exc)
             1 / 0
 
-    @_async_test
     async def test_async_enter_context(self):
         class TestCM(object):
             async def __aenter__(self):
@@ -167,7 +124,6 @@ class TestAsyncExitStack(TestBaseExitStack, unittest.TestCase):
 
         self.assertEqual(result, [1, 2, 3, 4])
 
-    @_async_test
     async def test_async_exit_exception_chaining(self):
         # Ensure exception chaining matches the reference behaviour
         async def raise_exc(exc):
@@ -181,7 +137,7 @@ class TestAsyncExitStack(TestBaseExitStack, unittest.TestCase):
             return True
 
         try:
-            async with self.exit_stack() as stack:
+            async with AsyncExitStack() as stack:
                 stack.push_async_callback(raise_exc, IndexError)
                 stack.push_async_callback(raise_exc, KeyError)
                 stack.push_async_callback(raise_exc, AttributeError)

@@ -16,6 +16,7 @@ import typing_extensions as Te
 # Project
 from .async_abc import AsyncABCMeta
 
+# Generic types
 K = T.TypeVar("K")
 
 

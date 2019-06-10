@@ -16,7 +16,7 @@ from ._from_coroutine import _from_coroutine
 from ..at_loop_shutdown import at_loop_shutdown
 from ..get_running_loop import get_running_loop
 
-# Type Generics
+# Generic types
 K = T.TypeVar("K")
 
 _default_executor: T.Optional[ProcessPoolExecutor] = None

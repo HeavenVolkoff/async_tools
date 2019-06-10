@@ -11,13 +11,14 @@ import typing as T
 from types import TracebackType
 from functools import wraps
 
-# Type Generics
+# External
+import typing_extensions as Te
+
+# Generic types
 K = T.TypeVar("K")
 
 
-# We extends AsyncContextManager instead of AbstractAsyncContextManager,
-# because that is available in python 3.5
-class _AsyncGeneratorContextManager(T.Generic[K], T.AsyncContextManager[K]):
+class _AsyncGeneratorContextManager(T.Generic[K], Te.AsyncContextManager[K]):
     """Helper for @asynccontextmanager."""
 
     def __init__(
@@ -49,7 +50,7 @@ class _AsyncGeneratorContextManager(T.Generic[K], T.AsyncContextManager[K]):
 
     async def __aexit__(
         self,
-        exc_type: T.Optional[T.Type[BaseException]],
+        exc_type: T.Optional[Te.Type[BaseException]],
         exc_value: T.Optional[BaseException],
         traceback: T.Optional[TracebackType],
     ) -> T.Optional[bool]:

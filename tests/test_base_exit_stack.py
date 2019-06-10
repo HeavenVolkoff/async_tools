@@ -1,10 +1,52 @@
 # Internal
+import asyncio
+import unittest
 from contextlib import contextmanager
 from test.support import requires_docstrings
 
+# External
+from async_tools.context._async_exit_stack import AsyncExitStack
 
-class TestBaseExitStack:
-    exit_stack = None
+
+class TestBaseExitStack(unittest.TestCase):
+    class SyncAsyncExitStack(AsyncExitStack):
+        @staticmethod
+        def run_coroutine(coro):
+            loop = asyncio.get_event_loop()
+
+            f = asyncio.ensure_future(coro)
+            f.add_done_callback(lambda f: loop.stop())
+            loop.run_forever()
+
+            exc = f.exception()
+
+            if not exc:
+                return f.result()
+            else:
+                context = exc.__context__
+
+                try:
+                    raise exc
+                except:
+                    exc.__context__ = context
+                    raise exc
+
+        def close(self):
+            return self.run_coroutine(self.aclose())
+
+        def __enter__(self):
+            return self.run_coroutine(self.__aenter__())
+
+        def __exit__(self, *exc_details):
+            return self.run_coroutine(self.__aexit__(*exc_details))
+
+    exit_stack = SyncAsyncExitStack
+
+    def setUp(self):
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+        self.addCleanup(self.loop.close)
+        self.addCleanup(asyncio.set_event_loop_policy, None)
 
     @requires_docstrings
     def test_instance_docs(self):

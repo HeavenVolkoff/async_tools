@@ -12,16 +12,19 @@ from types import TracebackType
 from asyncio import Task, Handle, TimeoutError, CancelledError
 from weakref import ReferenceType
 
+# External
+import typing_extensions as Te
+
 # Project
 from .loopable import Loopable
 from .current_task import current_task
 
 
-class Expires(T.ContextManager["Expires"], Loopable):
+class Expires(Te.ContextManager["Expires"], Loopable):
     """timeout context manager.
 
     Useful in cases when you want to apply timeout logic around block
-    of code or in cases when asyncio.wait_for is not suitable. For example:
+    of code or in cases when asyncio.wait_for is not suitable.
     """
 
     def __init__(
@@ -31,6 +34,8 @@ class Expires(T.ContextManager["Expires"], Loopable):
         super().__init__(**kwargs)
 
         # Internal
+        # ReferenceType is used to prevent a circular reference
+        # between the task and the Expires instance
         self._task: T.Optional["ReferenceType[Task[T.Any]]"] = None
         self._expired = False
         self._timeout = timeout
@@ -39,29 +44,25 @@ class Expires(T.ContextManager["Expires"], Loopable):
         self._cancel_handler: T.Optional[Handle] = None
 
     def __enter__(self) -> "Expires":
-        self._expired = False
+        if self._task is None:
+            task = current_task(self.loop)
+            if task is None:
+                raise RuntimeError("Timeout context manager should be used inside a task")
+            self._task = ReferenceType(task)
+        else:
+            if self._cancel_handler is not None:
+                raise RuntimeError("This context is already in use")
 
-        if self._timeout is not None:
-            # Get current task
-            if self._task is None:
-                task = current_task(self.loop)
-                if task is None:
-                    raise RuntimeError("Timeout context manager should be used inside a task")
+            if self._task() != current_task(self.loop):
+                raise ValueError("Can't change bound task after first use")
 
-                self._task = ReferenceType(task)
-
-            self._expire_at = self.loop.time()
-            if self._timeout <= 0:
-                self._cancel_handler = self.loop.call_soon(self._expire_task)
-            else:
-                self._expire_at += self._timeout
-                self._cancel_handler = self.loop.call_at(self._expire_at, self._expire_task)
+        self.reset()
 
         return self
 
     def __exit__(
         self,
-        exc_type: T.Optional[T.Type[BaseException]],
+        exc_type: T.Optional[Te.Type[BaseException]],
         exc_value: T.Optional[BaseException],
         traceback: T.Optional[TracebackType],
     ) -> bool:
@@ -69,7 +70,6 @@ class Expires(T.ContextManager["Expires"], Loopable):
             self._cancel_handler.cancel()
 
         # Clear some references
-        self._task = None
         self._cancel_handler = None
 
         if exc_type is CancelledError and self._expired:
@@ -98,13 +98,27 @@ class Expires(T.ContextManager["Expires"], Loopable):
         return self._expired
 
     def reset(self) -> None:
-        task = self._task() if self._task else None
+        if self._cancel_handler is not None:
+            self.__exit__(None, None, None)
+
+        if self._task is None:
+            raise ValueError("Can't reset non-used expires")
+
+        task = self._task()
         if task is None:
             raise ReferenceError("Task reference is not available anymore")
 
-        self.__exit__(None, None, None)
-        self._task = ReferenceType(task)
-        self.__enter__()
+        self._expired = False
+
+        if self._timeout is not None:
+            self._expire_at = self.loop.time()
+            if self._timeout <= 0:
+                self._cancel_handler = self.loop.call_soon(self._expire_task)
+            else:
+                self._expire_at += self._timeout
+                self._cancel_handler = self.loop.call_at(self._expire_at, self._expire_task)
+        else:
+            self._expire_at = 0.0
 
 
 __all__ = ("Expires",)

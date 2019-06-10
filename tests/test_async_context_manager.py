@@ -11,12 +11,12 @@ import unittest
 from test import support
 
 # External
-from tests.misc import _async_test
+import asynctest
 from async_tools.context._async_context_manager import asynccontextmanager
 
 
-class AsyncContextManagerTestCase(unittest.TestCase):
-    @_async_test
+@asynctest.strict
+class AsyncContextManagerTestCase(asynctest.TestCase, unittest.TestCase):
     async def test_contextmanager_plain(self):
         state = []
 
@@ -32,7 +32,6 @@ class AsyncContextManagerTestCase(unittest.TestCase):
             state.append(x)
         self.assertEqual(state, [1, 42, 999])
 
-    @_async_test
     async def test_contextmanager_finally(self):
         state = []
 
@@ -52,7 +51,6 @@ class AsyncContextManagerTestCase(unittest.TestCase):
                 raise ZeroDivisionError()
         self.assertEqual(state, [1, 42, 999])
 
-    @_async_test
     async def test_contextmanager_no_reraise(self):
         @asynccontextmanager
         async def whee():
@@ -63,7 +61,6 @@ class AsyncContextManagerTestCase(unittest.TestCase):
         # Calling __aexit__ should not result in an exception
         self.assertFalse(await ctx.__aexit__(TypeError, TypeError("foo"), None))
 
-    @_async_test
     async def test_contextmanager_trap_yield_after_throw(self):
         @asynccontextmanager
         async def whoo():
@@ -77,7 +74,6 @@ class AsyncContextManagerTestCase(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             await ctx.__aexit__(TypeError, TypeError("foo"), None)
 
-    @_async_test
     async def test_contextmanager_trap_no_yield(self):
         @asynccontextmanager
         async def whoo():
@@ -88,7 +84,6 @@ class AsyncContextManagerTestCase(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             await ctx.__aenter__()
 
-    @_async_test
     async def test_contextmanager_trap_second_yield(self):
         @asynccontextmanager
         async def whoo():
@@ -100,7 +95,6 @@ class AsyncContextManagerTestCase(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             await ctx.__aexit__(None, None, None)
 
-    @_async_test
     async def test_contextmanager_non_normalised(self):
         @asynccontextmanager
         async def whoo():
@@ -114,7 +108,6 @@ class AsyncContextManagerTestCase(unittest.TestCase):
         with self.assertRaises(SyntaxError):
             await ctx.__aexit__(RuntimeError, None, None)
 
-    @_async_test
     async def test_contextmanager_except(self):
         state = []
 
@@ -134,7 +127,6 @@ class AsyncContextManagerTestCase(unittest.TestCase):
             raise ZeroDivisionError(999)
         self.assertEqual(state, [1, 42, 999])
 
-    @_async_test
     async def test_contextmanager_except_stopiter(self):
         @asynccontextmanager
         async def woohoo():
@@ -150,7 +142,6 @@ class AsyncContextManagerTestCase(unittest.TestCase):
                 else:
                     self.fail(f"{stop_exc} was suppressed")
 
-    @_async_test
     async def test_contextmanager_wrap_runtimeerror(self):
         @asynccontextmanager
         async def woohoo():
@@ -187,25 +178,25 @@ class AsyncContextManagerTestCase(unittest.TestCase):
 
         return baz
 
+    @asynctest.fail_on(unused_loop=False)
     def test_contextmanager_attribs(self):
         baz = self._create_contextmanager_attribs()
         self.assertEqual(baz.__name__, "baz")
         self.assertEqual(baz.foo, "bar")
 
     @support.requires_docstrings
+    @asynctest.fail_on(unused_loop=False)
     def test_contextmanager_doc_attrib(self):
         baz = self._create_contextmanager_attribs()
         self.assertEqual(baz.__doc__, "Whee!")
 
     @support.requires_docstrings
-    @_async_test
     async def test_instance_docstring_given_cm_docstring(self):
         baz = self._create_contextmanager_attribs()(None)
         self.assertEqual(baz.__doc__, "Whee!")
         async with baz:
             pass  # suppress warning
 
-    @_async_test
     async def test_keywords(self):
         # Ensure no keyword arguments are inhibited
         @asynccontextmanager

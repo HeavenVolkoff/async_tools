@@ -16,10 +16,11 @@ from .is_coroutine_function import iscoroutinefunction
 
 try:
     __version__ = version(__name__)
-except Exception as exc:
+except Exception:
+    import traceback
     from warnings import warn
 
-    warn(f"Failed to set version due to: {exc}", RuntimeWarning)
+    warn(f"Failed to set version due to:\n{traceback.format_exc()}", ImportWarning)
     __version__ = "0.0a0"
 
 
