@@ -10,7 +10,7 @@ from async_tools import expires
 class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
     async def test_finish_in_time(self):
         async def long_running_task():
-            await asyncio.sleep(0.01, loop=self.loop)
+            await asyncio.sleep(0.01)
             return "done"
 
         with expires(0.1, loop=self.loop):
@@ -23,7 +23,7 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
 
         async def long_running_task():
             try:
-                await asyncio.sleep(10, loop=self.loop)
+                await asyncio.sleep(10)
             except asyncio.CancelledError:
                 nonlocal canceled_raised
                 canceled_raised = True
@@ -46,7 +46,7 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
 
     async def test_disable(self):
         async def long_running_task():
-            await asyncio.sleep(0.1, loop=self.loop)
+            await asyncio.sleep(0.1)
             return "done"
 
         t0 = self.loop.time()
@@ -59,7 +59,7 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
     async def test_enable_zero(self):
         with self.assertRaises(asyncio.TimeoutError):
             with expires(0, loop=self.loop) as exp:
-                await asyncio.sleep(0.1, loop=self.loop)
+                await asyncio.sleep(0.1)
 
         self.assertTrue(exp.expired)
 
@@ -72,7 +72,7 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
 
         with self.assertRaises(asyncio.TimeoutError):
             with expires(0, loop=self.loop) as exp:
-                await asyncio.sleep(0, loop=self.loop)
+                await asyncio.sleep(0)
                 await coro()
 
         self.assertTrue(exp.expired)
@@ -116,7 +116,7 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
             with expires(0.1, loop=self.loop):
                 foo_running = True
                 try:
-                    await asyncio.sleep(0.2, loop=self.loop)
+                    await asyncio.sleep(0.2)
                 finally:
                     foo_running = False
 
@@ -136,7 +136,7 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
             nonlocal has_timeout
             try:
                 with expires(0.001, loop=self.loop):
-                    await asyncio.sleep(1, loop=self.loop)
+                    await asyncio.sleep(1)
             except asyncio.TimeoutError:
                 has_timeout = True
 
@@ -152,7 +152,7 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
 
         async def outer():
             fut.set_result(None)
-            await asyncio.sleep(1, loop=self.loop)
+            await asyncio.sleep(1)
 
         task = asyncio.ensure_future(outer(), loop=self.loop)
         await fut
@@ -166,14 +166,14 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
     async def test_suppress_exception_chain(self):
         with self.assertRaises(asyncio.TimeoutError) as exp:
             with expires(0.01, loop=self.loop):
-                await asyncio.sleep(10, loop=self.loop)
+                await asyncio.sleep(10)
 
         self.assertFalse(exp.exception.__suppress_context__)
 
     async def test_expired(self):
         with self.assertRaises(asyncio.TimeoutError):
             with expires(0.01, loop=self.loop) as exp:
-                await asyncio.sleep(10, loop=self.loop)
+                await asyncio.sleep(10)
 
         self.assertTrue(exp.expired)
 
@@ -192,12 +192,12 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
         self.assertEqual(cm.remaining, 0.0)
 
         with expires(1.0, loop=self.loop) as cm:
-            await asyncio.sleep(0.1, loop=self.loop)
+            await asyncio.sleep(0.1)
             self.assertLess(cm.remaining, 1.0)
 
         with self.assertRaises(asyncio.TimeoutError):
             with expires(0.1, loop=self.loop) as cm:
-                await asyncio.sleep(0.5, loop=self.loop)
+                await asyncio.sleep(0.5)
 
         self.assertEqual(cm.remaining, 0.0)
 
@@ -212,12 +212,12 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
         async def outer():
             nonlocal exp
             with expires(0.3, loop=self.loop) as exp:
-                await asyncio.sleep(0.1, loop=self.loop)
+                await asyncio.sleep(0.1)
                 self.assertAlmostEqual(exp.remaining, 0.2, places=2)
-                await asyncio.sleep(0.2, loop=self.loop)
+                await asyncio.sleep(0.2)
 
         task = asyncio.ensure_future(outer(), loop=self.loop)
-        await asyncio.sleep(0.2, loop=self.loop)
+        await asyncio.sleep(0.2)
         exp.reset()
         await task
 
@@ -230,12 +230,12 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
         async def outer():
             nonlocal exp
             with expires(0.3, loop=self.loop) as exp:
-                await asyncio.sleep(0.1, loop=self.loop)
+                await asyncio.sleep(0.1)
                 self.assertAlmostEqual(exp.remaining, 0.2, places=2)
-                await asyncio.sleep(0.2, loop=self.loop)
+                await asyncio.sleep(0.2)
 
         task = asyncio.ensure_future(outer(), loop=self.loop)
-        await asyncio.sleep(0.2, loop=self.loop)
+        await asyncio.sleep(0.2)
 
         with self.assertRaises(asyncio.TimeoutError):
             await task
@@ -247,17 +247,17 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
         exp = None
 
         with expires(0.3, loop=self.loop) as exp:
-            await asyncio.sleep(0.1, loop=self.loop)
+            await asyncio.sleep(0.1)
 
         self.assertFalse(exp.expired)
 
         with exp:
-            await asyncio.sleep(0.1, loop=self.loop)
+            await asyncio.sleep(0.1)
 
         self.assertFalse(exp.expired)
 
         with exp:
-            await asyncio.sleep(0.1, loop=self.loop)
+            await asyncio.sleep(0.1)
 
         self.assertFalse(exp.expired)
 
@@ -269,7 +269,7 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
         with expires(0.3, loop=self.loop) as exp:
             with self.assertRaises(RuntimeError):
                 with exp:
-                    await asyncio.sleep(0.1, loop=self.loop)
+                    await asyncio.sleep(0.1)
 
     async def test_incorrect_reuse_2(self):
         exp = None
@@ -277,7 +277,7 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
         async def outer():
             nonlocal exp
             with expires(0.3, loop=self.loop) as exp:
-                await asyncio.sleep(0.1, loop=self.loop)
+                await asyncio.sleep(0.1)
                 self.assertAlmostEqual(exp.remaining, 0.2, places=2)
 
         task = asyncio.ensure_future(outer(), loop=self.loop)
@@ -310,7 +310,7 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
         del task
 
         # Allow loop to remove any internal reference
-        await asyncio.sleep(0, loop=self.loop)
+        await asyncio.sleep(0)
 
         # Force gc to collect all dangling references
         collect(generation=2)
@@ -320,14 +320,14 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
 
     async def test_suppress_no_expires(self):
         with expires(0.3, loop=self.loop, suppress=True) as exp:
-            await asyncio.sleep(0.1, loop=self.loop)
+            await asyncio.sleep(0.1)
 
         self.assertAlmostEqual(exp.remaining, 0.2, places=2)
         self.assertFalse(exp.expired)
 
     async def test_suppress_expires(self):
         with expires(0, loop=self.loop, suppress=True) as exp:
-            await asyncio.sleep(0.1, loop=self.loop)
+            await asyncio.sleep(0.1)
 
         self.assertEqual(exp.remaining, 0.0)
         self.assertTrue(exp.expired)
