@@ -11,7 +11,6 @@ K = T.TypeVar("K")
 L = T.TypeVar("L")
 
 
-# noinspection PyPep8Naming
 class AsyncGeneratorCloseContext(T.Generic[K, L], Te.AsyncContextManager[Te.AsyncGenerator[K, L]]):
     def __init__(self, aiter: T.AsyncGenerator[K, L]) -> None:
         self._aiter = aiter

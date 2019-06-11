@@ -7,7 +7,7 @@ except ImportError:
     import typing as T
 
     # A basic shim of get_running_loop for python 3.6
-    def get_running_loop() -> T.Optional[AbstractEventLoop]:
+    def get_running_loop() -> AbstractEventLoop:
         from asyncio import get_event_loop
 
         exc: T.Optional[Exception] = None
