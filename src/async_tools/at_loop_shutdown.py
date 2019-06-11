@@ -9,9 +9,9 @@ from .attempt_await import attempt_await
 from .wait_with_care import wait_with_care
 from .get_running_loop import get_running_loop
 
-_callbacks = (
+cb_map: T.MutableMapping[AbstractEventLoop, T.Optional[T.List[T.Callable[[], T.Any]]]] = (
     WeakKeyDictionary()
-)  # type: WeakKeyDictionary[AbstractEventLoop, T.Optional[T.List[T.Callable[[], T.Any]]]]
+)
 
 
 async def _schedule_at_loop_shutdown(loop: AbstractEventLoop) -> T.AsyncGenerator[None, None]:
@@ -26,7 +26,7 @@ async def _schedule_at_loop_shutdown(loop: AbstractEventLoop) -> T.AsyncGenerato
     except GeneratorExit:
         pass
     finally:
-        callbacks = _callbacks[loop]
+        callbacks = cb_map[loop]
         if not callbacks:
             return
 
@@ -34,11 +34,11 @@ async def _schedule_at_loop_shutdown(loop: AbstractEventLoop) -> T.AsyncGenerato
             *(attempt_await(callback, loop=loop) for callback in callbacks), ignore_cancelled=True
         )
 
-        _callbacks[loop] = None
+        cb_map[loop] = None
 
         await coro
 
-        del _callbacks[loop]
+        del cb_map[loop]
 
 
 def at_loop_shutdown(
@@ -61,19 +61,18 @@ def at_loop_shutdown(
     if not loop:
         # Get current loop if none was passed
         loop = get_running_loop()
-
-    if not loop.is_running():
+    elif not loop.is_running():
         # If the loop isn't running the asyncgen won't be registered internally until next run.
         # To avoid confusion it is best to only allow running loops to have at_stop callbacks.
         raise RuntimeError("Loop must be running to schedule a at_loop_exit callback")
 
     callbacks: T.Optional[T.List[T.Callable[[], T.Any]]]
-    if loop not in _callbacks:
+    if loop not in cb_map:
         # Execute scheduling asyncgen first iteration to register it internally
         loop.create_task(anext(_schedule_at_loop_shutdown(loop)))
-        _callbacks[loop] = callbacks = []
+        cb_map[loop] = callbacks = []
     else:
-        callbacks = _callbacks[loop]
+        callbacks = cb_map[loop]
 
     if callbacks is None:
         # Loop is already closing, just execute callback

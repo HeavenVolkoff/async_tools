@@ -4,15 +4,23 @@ from asyncio import AbstractEventLoop
 try:
     from asyncio import get_running_loop
 except ImportError:
-    from asyncio import get_event_loop
+    import typing as T
 
-    def get_running_loop() -> AbstractEventLoop:
-        loop = get_event_loop()
+    # A basic shim of get_running_loop for python 3.6
+    def get_running_loop() -> T.Optional[AbstractEventLoop]:
+        from asyncio import get_event_loop
 
-        if not loop.is_running():
-            raise RuntimeError("no running event loop")
+        exc: T.Optional[Exception] = None
 
-        return loop
+        try:
+            loop = get_event_loop()
+
+            if loop.is_running():
+                return loop
+        except Exception as exc:
+            pass
+
+        raise RuntimeError("no running event loop") from exc
 
 
 __all__ = ("get_running_loop",)

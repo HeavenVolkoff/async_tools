@@ -7,15 +7,32 @@ See original licenses in:
 """
 
 # Internal
+import sys
 import unittest
 
 # External
 import asynctest
+import typing_extensions as Te
 from async_tools.context._async_exit_stack import AsyncExitStack
 
 
 @asynctest.strict
 class TestAsyncExitStack(asynctest.TestCase, unittest.TestCase):
+    @unittest.skipUnless(sys.version_info >= (3, 7), "This test is only valid in Python >= 3.7")
+    @asynctest.fail_on(unused_loop=False)
+    def test_import_correctness(self):
+        from contextlib import AsyncExitStack as native
+
+        self.assertIs(AsyncExitStack, native)
+
+    @unittest.skipUnless(sys.version_info <= (3, 6), "This test is only valid in Python <= 3.6")
+    @asynctest.fail_on(unused_loop=False)
+    def test_import_correctness(self):
+        with self.assertRaises(ImportError):
+            from contextlib import AsyncExitStack
+
+        self.assertTrue(issubclass(AsyncExitStack, Te.AsyncContextManager))
+
     async def test_async_callback(self):
         expected = [
             ((), {}),

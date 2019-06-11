@@ -7,16 +7,34 @@ See original licenses in:
 """
 
 # Internal
+import sys
 import unittest
 from test import support
 
 # External
 import asynctest
+import typing_extensions as Te
 from async_tools.context._async_context_manager import asynccontextmanager
 
 
 @asynctest.strict
 class AsyncContextManagerTestCase(asynctest.TestCase, unittest.TestCase):
+    @unittest.skipUnless(sys.version_info >= (3, 7), "This test is only valid in Python >= 3.7")
+    @asynctest.fail_on(unused_loop=False)
+    def test_import_correctness(self):
+        from contextlib import asynccontextmanager as native
+
+        self.assertIs(asynccontextmanager, native)
+
+    @unittest.skipUnless(sys.version_info <= (3, 6), "This test is only valid in Python <= 3.6")
+    @asynctest.fail_on(unused_loop=False)
+    def test_import_correctness(self):
+        with self.assertRaises(ImportError):
+            from contextlib import asynccontextmanager as native
+
+        self.assertTrue(callable(asynccontextmanager))
+        self.assertIsInstance(asynccontextmanager(lambda: True), Te.AsyncContextManager)
+
     async def test_contextmanager_plain(self):
         state = []
 
