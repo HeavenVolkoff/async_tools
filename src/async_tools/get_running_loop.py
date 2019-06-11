@@ -17,7 +17,8 @@ except ImportError:
 
             if loop.is_running():
                 return loop
-        except Exception as exc:
+        except Exception as ex:
+            exc = ex
             pass
 
         raise RuntimeError("no running event loop") from exc
