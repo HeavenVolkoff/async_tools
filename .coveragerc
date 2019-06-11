@@ -1,6 +1,7 @@
 # .coveragerc to control coverage.py
 [run]
 branch = True
+source = async_tools
 
 [report]
 exclude_lines =
