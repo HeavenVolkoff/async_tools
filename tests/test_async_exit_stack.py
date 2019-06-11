@@ -66,6 +66,9 @@ class TestAsyncExitStack(asynctest.TestCase, unittest.TestCase):
 
         self.assertEqual(result, expected)
 
+        with self.assertRaises(TypeError):
+            AsyncExitStack.push_async_callback()
+
         result = []
         async with AsyncExitStack() as stack:
             with self.assertRaises(TypeError):

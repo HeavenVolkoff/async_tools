@@ -278,7 +278,7 @@ class AsyncExitStack(_BaseExitStack, Te.AsyncContextManager["AsyncExitStack"]):
             self, callback, *args = args  # type: ignore
         elif not args:
             raise TypeError(
-                "descriptor 'push_async_callback' of " "'AsyncExitStack' object needs an argument"
+                "descriptor 'push_async_callback' of 'AsyncExitStack' object needs an argument"
             )
         elif "callback" in kwargs:
             callback = kwargs.pop("callback")
