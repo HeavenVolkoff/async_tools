@@ -13,7 +13,7 @@ before_install:
     - pip --no-cache install -U pip setuptools
 
 install:
-    - pip install ".[tests]" && pip uninstall async_tools
+    - pip install -qe ".[tests]"
 
 script:
     - env PYTHONPATH="./src" coverage run -m unittest discover -s tests
