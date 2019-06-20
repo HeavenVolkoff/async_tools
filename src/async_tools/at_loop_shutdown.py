@@ -31,7 +31,7 @@ async def _schedule_at_loop_shutdown(loop: AbstractEventLoop) -> T.AsyncGenerato
             return
 
         coro = wait_with_care(
-            *(attempt_await(callback, loop=loop) for callback in callbacks), ignore_cancelled=True
+            *(attempt_await(callback) for callback in callbacks), ignore_cancelled=True
         )
 
         cb_map[loop] = None
@@ -76,6 +76,6 @@ def at_loop_shutdown(
 
     if callbacks is None:
         # Loop is already closing, just execute callback
-        loop.create_task(wait_with_care(attempt_await(callback, loop=loop), ignore_cancelled=True))
+        loop.create_task(wait_with_care(attempt_await(callback), ignore_cancelled=True))
     else:
         callbacks.append(callback)
