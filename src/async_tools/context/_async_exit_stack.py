@@ -81,11 +81,11 @@ class _BaseExitStack:
         self._exit_callbacks = deque()
         return new_stack
 
-    @Te.overload
+    @T.overload
     def push(self, exit_cb: ExitCallback) -> ExitCallback:
         ...
 
-    @Te.overload
+    @T.overload
     def push(self, exit_cb: SupportsExit) -> SupportsExit:
         ...
 
@@ -240,11 +240,11 @@ class AsyncExitStack(_BaseExitStack, Te.AsyncContextManager["AsyncExitStack"]):
         self._push_exit_callback(MethodType(cm_type.__aexit__, cm), False)
         return result
 
-    @Te.overload
+    @T.overload
     def push_async_exit(self, exit_cb: AsyncExitCallback) -> AsyncExitCallback:
         ...
 
-    @Te.overload
+    @T.overload
     def push_async_exit(self, exit_cb: SupportsAsyncExit) -> SupportsAsyncExit:
         ...
 

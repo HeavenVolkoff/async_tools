@@ -14,12 +14,12 @@ K = T.TypeVar("K")
 _NOT_PROVIDED = object()  # sentinel object to detect when a kwarg was not given
 
 
-@Te.overload
+@T.overload
 def aiter(iterable: Te.AsyncIterable[K]) -> Te.AsyncIterator[K]:
     ...
 
 
-@Te.overload
+@T.overload
 def aiter(iterable: T.Callable[[], Te.Awaitable[K]], sentinel: T.Any) -> Te.AsyncIterator[K]:
     ...
 

@@ -15,12 +15,12 @@ L = T.TypeVar("L")
 _NOT_PROVIDED = object()  # sentinel object to detect when a kwarg was not given
 
 
-@Te.overload
+@T.overload
 async def anext(async_iterator: T.AsyncGenerator[K, T.Any]) -> K:
     ...
 
 
-@Te.overload
+@T.overload
 async def anext(async_iterator: T.AsyncGenerator[K, T.Any], default: L) -> T.Union[K, L]:
     ...
 
