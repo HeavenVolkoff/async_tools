@@ -22,11 +22,18 @@ async def attempt_await(awaitable: K) -> K:
     ...
 
 
-async def attempt_await(awaitable: T.Union[Te.Awaitable[K], K]) -> K:
+async def attempt_await(awaitable: T.Any, loop: T.Optional[AbstractEventLoop] = None) -> T.Any:
+    if loop is None:
+        loop = get_running_loop()
+    else:
+        from warnings import warn
+
+        warn("attempt_await's loop argument will be removed in version 2.0", DeprecationWarning)
+
     try:
-        result_fut = ensure_future(T.cast(Te.Awaitable[K], awaitable), loop=get_running_loop())
+        result_fut = ensure_future(T.cast(Te.Awaitable[T.Any], awaitable), loop=loop)
     except TypeError:
-        return T.cast(K, awaitable)  # Not an awaitable
+        return awaitable  # Not an awaitable
     else:
         return await result_fut
 
