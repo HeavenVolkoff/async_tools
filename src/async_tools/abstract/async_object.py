@@ -35,7 +35,7 @@ class AsyncObjectMeta(AsyncABCMeta):
 
     @staticmethod
     def __new__(
-        mcs: Te.Type["AsyncObjectMeta"],
+        mcs: T.Type["AsyncObjectMeta"],
         name: str,
         bases: T.Tuple[type, ...],
         namespace: T.Dict[str, T.Any],

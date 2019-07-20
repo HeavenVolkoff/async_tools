@@ -12,15 +12,12 @@ from types import TracebackType
 from asyncio import Task, Handle, TimeoutError, CancelledError
 from weakref import ReferenceType
 
-# External
-import typing_extensions as Te
-
 # Project
 from .loopable import Loopable
 from .current_task import current_task
 
 
-class Expires(Te.ContextManager["Expires"], Loopable):
+class Expires(T.ContextManager["Expires"], Loopable):
     """timeout context manager.
 
     Useful in cases when you want to apply timeout logic around block
@@ -62,7 +59,7 @@ class Expires(Te.ContextManager["Expires"], Loopable):
 
     def __exit__(
         self,
-        exc_type: T.Optional[Te.Type[BaseException]],
+        exc_type: T.Optional[T.Type[BaseException]],
         exc_value: T.Optional[BaseException],
         traceback: T.Optional[TracebackType],
     ) -> bool:

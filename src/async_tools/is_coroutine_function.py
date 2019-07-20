@@ -13,17 +13,17 @@ from types import MethodType
 from functools import partial
 
 
-def iscoroutinefunction(
+def is_coroutine_function(
     func: T.Union["partial[T.Any]", T.Callable[..., T.Any], MethodType]
 ) -> bool:
     """
     Modified test for a coroutine function with awareness of functools.partial
     """
     if isinstance(func, partial):
-        return iscoroutinefunction(func.func)
+        return is_coroutine_function(func.func)
     if isinstance(func, MethodType):
-        return iscoroutinefunction(func.__func__)
+        return is_coroutine_function(func.__func__)
     return inspect.iscoroutinefunction(func) or inspect.isasyncgenfunction(func)
 
 
-__all__ = ("iscoroutinefunction",)
+__all__ = ("is_coroutine_function",)

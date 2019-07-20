@@ -12,7 +12,7 @@ from .attempt_await import attempt_await
 from .wait_with_care import ALL_COMPLETED, FIRST_COMPLETED, FIRST_EXCEPTION, wait_with_care
 from .at_loop_shutdown import at_loop_shutdown
 from .get_running_loop import get_running_loop
-from .is_coroutine_function import iscoroutinefunction
+from .is_coroutine_function import is_coroutine_function
 
 try:
     __version__ = version(__name__)
@@ -37,5 +37,5 @@ __all__ = (
     "FIRST_EXCEPTION",
     "wait_with_care",
     "get_running_loop",
-    "iscoroutinefunction",
+    "is_coroutine_function",
 )

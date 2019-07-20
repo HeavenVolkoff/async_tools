@@ -5,9 +5,6 @@ Modified from: https://github.com/python/cpython/pull/8895
 # Internal
 import typing as T
 
-# External
-import typing_extensions as Te
-
 # Generic types
 K = T.TypeVar("K")
 L = T.TypeVar("L")
@@ -35,7 +32,7 @@ async def anext(
         default: Default parameter to be returned instead of raising StopAsyncIteration.
 
     """
-    if not isinstance(async_iterator, Te.AsyncIterator):
+    if not isinstance(async_iterator, T.AsyncIterator):
         raise TypeError(f"anext expected an AsyncIterator, got {type(async_iterator)}")
 
     async_next = async_iterator.__anext__

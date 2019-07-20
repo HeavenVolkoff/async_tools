@@ -2,9 +2,6 @@
 import typing as T
 from asyncio import AbstractEventLoop, ensure_future
 
-# External
-import typing_extensions as Te
-
 # Project
 from .get_running_loop import get_running_loop
 
@@ -13,7 +10,7 @@ K = T.TypeVar("K")
 
 
 @T.overload
-async def attempt_await(awaitable: Te.Awaitable[K]) -> K:
+async def attempt_await(awaitable: T.Awaitable[K]) -> K:
     ...
 
 
@@ -31,7 +28,7 @@ async def attempt_await(awaitable: T.Any, loop: T.Optional[AbstractEventLoop] = 
         warn("attempt_await's loop argument will be removed in version 2.0", DeprecationWarning)
 
     try:
-        result_fut = ensure_future(T.cast(Te.Awaitable[T.Any], awaitable), loop=loop)
+        result_fut = ensure_future(T.cast(T.Awaitable[T.Any], awaitable), loop=loop)
     except TypeError:
         return awaitable  # Not an awaitable
     else:
