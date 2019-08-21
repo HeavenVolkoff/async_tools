@@ -11,14 +11,13 @@ from .get_running_loop import get_running_loop
 # Generic types
 K = T.TypeVar("K")
 
-
 @T.overload
-async def attempt_await(awaitable: Te.Awaitable[K]) -> K:
+async def attempt_await(awaitable: T.Awaitable[K], loop: T.Optional[AbstractEventLoop] = None) -> K:
     ...
 
 
 @T.overload
-async def attempt_await(awaitable: K) -> K:
+async def attempt_await(awaitable: K, loop: T.Optional[AbstractEventLoop] = None) -> K:
     ...
 
 
