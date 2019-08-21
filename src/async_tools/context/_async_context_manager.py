@@ -50,7 +50,7 @@ class _AsyncGeneratorContextManager(T.Generic[K], Te.AsyncContextManager[K]):
 
     async def __aexit__(
         self,
-        exc_type: T.Optional[Te.Type[BaseException]],
+        exc_type: T.Optional[T.Type[BaseException]],
         exc_value: T.Optional[BaseException],
         traceback: T.Optional[TracebackType],
     ) -> T.Optional[bool]:

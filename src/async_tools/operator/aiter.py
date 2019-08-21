@@ -15,19 +15,19 @@ _NOT_PROVIDED = object()  # sentinel object to detect when a kwarg was not given
 
 
 @T.overload
-def aiter(iterable: Te.AsyncIterable[K]) -> Te.AsyncIterator[K]:
+def aiter(iterable: T.AsyncIterable[K]) -> T.AsyncIterator[K]:
     ...
 
 
 @T.overload
-def aiter(iterable: T.Callable[[], Te.Awaitable[K]], sentinel: T.Any) -> Te.AsyncIterator[K]:
+def aiter(iterable: T.Callable[[], T.Awaitable[K]], sentinel: T.Any) -> T.AsyncIterator[K]:
     ...
 
 
 def aiter(
-    iterable: T.Union[Te.AsyncIterable[K], T.Callable[[], Te.Awaitable[K]]],
+    iterable: T.Union[T.AsyncIterable[K], T.Callable[[], T.Awaitable[K]]],
     sentinel: T.Any = _NOT_PROVIDED,
-) -> Te.AsyncIterator[K]:
+) -> T.AsyncIterator[K]:
     """Like the iter() builtin but for async iterables and callables.
 
     Arguments:
@@ -41,20 +41,20 @@ def aiter(
 
     """
     if sentinel is _NOT_PROVIDED:
-        if not isinstance(iterable, Te.AsyncIterable):
+        if not isinstance(iterable, T.AsyncIterable):
             raise TypeError(f"aiter expected an AsyncIterable, got {type(iterable)}")
 
-        if isinstance(iterable, Te.AsyncIterator):
+        if isinstance(iterable, T.AsyncIterator):
             return iterable
 
         async def to_aiter() -> Te.AsyncGenerator[K, None]:
-            assert isinstance(iterable, Te.AsyncIterable)
+            assert isinstance(iterable, T.AsyncIterable)
             async for i in iterable:
                 yield i
 
         return to_aiter()
 
-    async def ait() -> Te.AsyncIterator[K]:
+    async def ait() -> T.AsyncIterator[K]:
         if not callable(iterable):
             raise TypeError(f"aiter expected an async callable, got {type(iterable)}")
 

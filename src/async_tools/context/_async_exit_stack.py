@@ -18,13 +18,13 @@ import typing_extensions as Te
 # Generic types
 L = T.TypeVar("L")
 M = T.TypeVar("M", bound=T.Callable[..., T.Any])
-N = T.TypeVar("N", bound=T.Callable[..., Te.Coroutine[T.Any, T.Any, T.Any]])
+N = T.TypeVar("N", bound=T.Callable[..., T.Coroutine[T.Any, T.Any, T.Any]])
 
 
 class ExitCallback(Te.Protocol):
     def __call__(
         self,
-        exc_type: T.Optional[Te.Type[BaseException]],
+        exc_type: T.Optional[T.Type[BaseException]],
         exc_value: T.Optional[BaseException],
         traceback: T.Optional[TracebackType],
     ) -> T.Optional[bool]:
@@ -39,7 +39,7 @@ class SupportsExit(Te.Protocol):
 class AsyncExitCallback(Te.Protocol):
     async def __call__(
         self,
-        exc_type: T.Optional[Te.Type[BaseException]],
+        exc_type: T.Optional[T.Type[BaseException]],
         exc_value: T.Optional[BaseException],
         traceback: T.Optional[TracebackType],
     ) -> T.Optional[bool]:
@@ -108,7 +108,7 @@ class _BaseExitStack:
 
         return exit_cb  # Allow use as a decorator.
 
-    def enter_context(self, cm: Te.ContextManager[L]) -> L:
+    def enter_context(self, cm: T.ContextManager[L]) -> L:
         """Enters the supplied context manager.
         If successful, also pushes its __exit__ method as a callback and
         returns the result of the __enter__ method.
@@ -166,7 +166,7 @@ class AsyncExitStack(_BaseExitStack, Te.AsyncContextManager["AsyncExitStack"]):
 
     @staticmethod
     def _create_async_cb_wrapper(
-        callback: T.Callable[..., Te.Coroutine[T.Any, T.Any, T.Any]], *args: T.Any, **kwargs: T.Any
+        callback: T.Callable[..., T.Coroutine[T.Any, T.Any, T.Any]], *args: T.Any, **kwargs: T.Any
     ) -> AsyncExitCallback:
         async def _exit_wrapper(exc_type: T.Any, exc_value: T.Any, traceback: T.Any) -> bool:
             await callback(*args, **kwargs)
@@ -179,7 +179,7 @@ class AsyncExitStack(_BaseExitStack, Te.AsyncContextManager["AsyncExitStack"]):
 
     async def __aexit__(
         self,
-        exc_type: T.Optional[Te.Type[BaseException]],
+        exc_type: T.Optional[T.Type[BaseException]],
         exc_value: T.Optional[BaseException],
         traceback: T.Optional[TracebackType],
     ) -> T.Optional[bool]:
@@ -199,10 +199,10 @@ class AsyncExitStack(_BaseExitStack, Te.AsyncContextManager["AsyncExitStack"]):
             try:
                 cb_awaitable = cb(exc_type, exc_value, traceback)
                 if is_sync:
-                    assert not isinstance(cb_awaitable, Te.Awaitable)
+                    assert not isinstance(cb_awaitable, T.Awaitable)
                     cb_suppress = cb_awaitable
                 else:
-                    assert isinstance(cb_awaitable, Te.Awaitable)
+                    assert isinstance(cb_awaitable, T.Awaitable)
                     cb_suppress = await cb_awaitable
 
                 if cb_suppress:
