@@ -1,6 +1,6 @@
 # Internal
 import typing as T
-from asyncio import Future, wait, get_event_loop
+from asyncio import Future, CancelledError, wait, get_event_loop
 from concurrent.futures import ALL_COMPLETED, FIRST_COMPLETED, FIRST_EXCEPTION
 
 # Generic types
@@ -29,10 +29,13 @@ async def wait_with_care(
     assert return_when != ALL_COMPLETED or not pending
 
     for fut in done:
-        if fut.cancelled() and ignore_cancelled:
-            continue
+        try:
+            exc = fut.exception()
+        except CancelledError:
+            if ignore_cancelled:
+                continue
+            raise
 
-        exc = fut.exception()
         if exc:
             if raise_first_error:
                 raise exc

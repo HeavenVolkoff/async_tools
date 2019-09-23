@@ -4,6 +4,8 @@ import unittest
 
 # External
 import asynctest
+
+# External
 from async_tools.context import aclosing
 
 

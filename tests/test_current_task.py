@@ -5,6 +5,8 @@ import unittest
 
 # External
 import asynctest
+
+# External
 from async_tools.current_task import current_task
 
 

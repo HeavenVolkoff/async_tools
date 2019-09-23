@@ -73,7 +73,8 @@ class Expires(T.ContextManager["Expires"], Loopable):
             if self._suppress:
                 return True
 
-            raise TimeoutError
+            # Suppress CancelledError from error chain, it was only causing confusion
+            raise TimeoutError from None
 
         return False
 

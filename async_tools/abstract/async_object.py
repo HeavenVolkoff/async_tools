@@ -2,16 +2,15 @@
 
 Reference:
     https://github.com/dabeaz/curio/blob/3d610aea866178800b1e5dbf5cfef8210418fb58/curio/meta.py
+Removed in:
+    https://github.com/dabeaz/curio/commit/66c60fec61610ae386bc03717724e6438948a419
 See original licenses in:
-    https://github.com/dabeaz/curio/blob/3452129f513df501b962f456ef68c4204c2ad4c2/LICENSE
+    https://github.com/dabeaz/curio/blob/3d610aea866178800b1e5dbf5cfef8210418fb58/LICENSE
 """
 
 # Internal
 import typing as T
 import inspect
-
-# External
-import typing_extensions as Te
 
 # Project
 from .async_abc import AsyncABCMeta
