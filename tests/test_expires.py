@@ -1,6 +1,7 @@
 # Internal
 import asyncio
 import unittest
+from asyncio import CancelledError
 
 # External
 import asynctest
@@ -170,7 +171,8 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
             with expires(0.01, loop=self.loop):
                 await asyncio.sleep(10)
 
-        self.assertFalse(exp.exception.__suppress_context__)
+        self.assertTrue(exp.exception.__suppress_context__)
+        self.assertIsInstance(exp.exception.__context__, CancelledError)
 
     async def test_expired(self):
         with self.assertRaises(asyncio.TimeoutError):
