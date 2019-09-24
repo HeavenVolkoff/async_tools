@@ -22,7 +22,6 @@ async def wait_with_care(
         return_when = FIRST_EXCEPTION if raise_first_error else ALL_COMPLETED
 
     assert return_when in (ALL_COMPLETED, FIRST_COMPLETED, FIRST_EXCEPTION)
-    assert return_when != FIRST_EXCEPTION and not raise_first_error
 
     done, pending = await wait(futures, return_when=return_when)
 
@@ -41,10 +40,7 @@ async def wait_with_care(
                 raise exc
 
             loop.call_exception_handler(
-                {
-                    "message": f"Exception was raised while waiting {type(fut).__qualname__}",
-                    "exception": exc,
-                }
+                {"message": f"Exception was raised while waiting {repr(fut)}", "exception": exc}
             )
 
     return done, pending
