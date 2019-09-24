@@ -10,9 +10,6 @@ See original licenses in:
 import typing as T
 import inspect
 
-# External
-import typing_extensions as Te
-
 # Project
 from ..is_coroutine_function import is_coroutine_function
 

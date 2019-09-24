@@ -101,9 +101,9 @@ def _process_annotation(
                     at_loop_shutdown(partial(process_pool.shutdown, wait=False))
 
             if kwargs:
-                return loop.run_in_executor(process_pool, lambda: func(*args, **kwargs))
+                return loop.run_in_executor(process_pool, partial(wrapper, *args, **kwargs))
 
-            return loop.run_in_executor(process_pool, func, *args)
+            return loop.run_in_executor(process_pool, wrapper, *args)
         else:
             return func(*args, **kwargs)
 

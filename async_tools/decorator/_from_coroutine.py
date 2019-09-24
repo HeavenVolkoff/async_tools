@@ -11,7 +11,7 @@ import inspect
 
 try:
     from sys import _getframe
-except ImportError:
+except ImportError:  # pragma: no cover
     print("This is only compatible with CPython at the moment")
     raise
 
