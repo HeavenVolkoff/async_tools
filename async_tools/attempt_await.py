@@ -9,18 +9,6 @@ from .get_running_loop import get_running_loop
 K = T.TypeVar("K")
 
 
-@T.overload
-async def attempt_await(
-    maybe_awaitable: T.Awaitable[K], loop: T.Optional[AbstractEventLoop] = None
-) -> K:
-    ...
-
-
-@T.overload
-async def attempt_await(maybe_awaitable: K, loop: T.Optional[AbstractEventLoop] = None) -> K:
-    ...
-
-
 async def attempt_await(
     maybe_awaitable: T.Union[T.Awaitable[K], K], loop: T.Optional[AbstractEventLoop] = None
 ) -> K:
