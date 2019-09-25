@@ -14,35 +14,40 @@ cb_map: T.MutableMapping[AbstractEventLoop, T.Optional[T.List[T.Callable[[], T.A
 )
 
 
-async def _schedule_at_loop_shutdown(loop: AbstractEventLoop) -> T.AsyncGenerator[None, None]:
+async def _schedule_at_loop_shutdown() -> T.AsyncGenerator[None, None]:
     """Responsible to scheduling all shutdown callbacks of a loop. This rely on the common practice
     of shutting down async generators after the loop stops. Which allows us to detect such event and
     execute the callbacks.
 
     More info: https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.loop.shutdown_asyncgens
     """
+    loop = get_running_loop()
+
     try:
         yield
     except GeneratorExit:
         pass
     finally:
-        callbacks = cb_map[loop]
-        if not callbacks:
+        callbacks = cb_map.get(loop, None)
+        if callbacks is None:
             return
-
-        coro = wait_with_care(
-            *(attempt_await(callback) for callback in callbacks), ignore_cancelled=True
-        )
-
-        cb_map[loop] = None
-
-        await coro
 
         del cb_map[loop]
 
+        if not callbacks:
+            return
+
+        if not loop.is_closed():
+            loop.create_task(
+                wait_with_care(
+                    *(attempt_await(callback(loop)) for callback in callbacks),
+                    ignore_cancelled=True,
+                )
+            )
+
 
 def at_loop_shutdown(
-    callback: T.Callable[[], T.Any], *, loop: T.Optional[AbstractEventLoop] = None
+    callback: T.Callable[[AbstractEventLoop], T.Any], *, loop: T.Optional[AbstractEventLoop] = None
 ) -> None:
     """Allows scheduling a callback to be called during event loop shutdown logic.
 
@@ -69,13 +74,14 @@ def at_loop_shutdown(
     callbacks: T.Optional[T.List[T.Callable[[], T.Any]]]
     if loop not in cb_map:
         # Execute scheduling asyncgen first iteration to register it internally
-        loop.create_task(anext(_schedule_at_loop_shutdown(loop)))
+        loop.create_task(_schedule_at_loop_shutdown().asend(None))
         cb_map[loop] = callbacks = []
     else:
-        callbacks = cb_map[loop]
+        callbacks = cb_map.get(loop, None)
 
     if callbacks is None:
-        # Loop is already closing, just execute callback
-        loop.create_task(wait_with_care(attempt_await(callback), ignore_cancelled=True))
+        if not loop.is_closed():
+            # Loop is already closing, just execute callback
+            loop.create_task(wait_with_care(attempt_await(callback(loop)), ignore_cancelled=True))
     else:
         callbacks.append(callback)

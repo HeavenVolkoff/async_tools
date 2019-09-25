@@ -1,12 +1,14 @@
 # Internal
 import typing as T
 import unittest
+import multiprocessing
+from asyncio import gather
 from inspect import isawaitable
+from concurrent.futures.thread import ThreadPoolExecutor
+from concurrent.futures.process import ProcessPoolExecutor
 
 # External
 import asynctest
-
-# External
 from async_tools.decorator.blocking import thread, process
 
 PI = "3.141592653589793238462643383279502884197169399375105820974944592307816406286208998628034825342117070"
@@ -35,8 +37,18 @@ def test_thread(precision=100):
     return str(calculate_pi(precision))
 
 
+@thread(ThreadPoolExecutor(multiprocessing.cpu_count()))
+def test_thread_multi(precision=100):
+    return str(calculate_pi(precision))
+
+
 @process
 def test_process(precision=100):
+    return str(calculate_pi(precision))
+
+
+@process(ProcessPoolExecutor(multiprocessing.cpu_count()))
+def test_process_multi(precision=100):
     return str(calculate_pi(precision))
 
 
@@ -52,6 +64,12 @@ class BlockingTestCase(asynctest.TestCase, unittest.TestCase):
 
         self.assertEqual(await awaitable, PI)
 
+    async def test_async_thread_multiple(self):
+        results = await gather(*(test_thread_multi() for _ in range(multiprocessing.cpu_count())))
+
+        for r in results:
+            self.assertEqual(r, PI)
+
     def test_sync_process(self):
         self.assertEqual(test_process(), PI)
 
@@ -62,6 +80,12 @@ class BlockingTestCase(asynctest.TestCase, unittest.TestCase):
         self.assertIsInstance(awaitable, T.Awaitable)
 
         self.assertEqual(await awaitable, PI)
+
+    async def test_async_process_multiple(self):
+        results = await gather(*(test_process_multi() for _ in range(multiprocessing.cpu_count())))
+
+        for r in results:
+            self.assertEqual(r, PI)
 
     def test_sync_thread_80(self):
         self.assertEqual(test_thread(80), PI_80)
