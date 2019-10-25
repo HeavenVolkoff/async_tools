@@ -38,12 +38,12 @@ class AsyncObjectMeta(AsyncABCMeta):
         name: str,
         bases: T.Tuple[type, ...],
         namespace: T.Dict[str, T.Any],
-    ) -> None:
+    ) -> "AsyncObjectMeta":
         if "__init__" in namespace and not inspect.iscoroutinefunction(namespace["__init__"]):
             raise TypeError("__init__ must be a coroutine")
         return super().__new__(mcs, name, bases, namespace)  # type: ignore
 
-    async def __call__(cls: K, *args: T.Any, **kwargs: T.Any) -> K:
+    async def __call__(cls: T.Type[K], *args: T.Any, **kwargs: T.Any) -> K:
         self: K = cls.__new__(cls, *args, **kwargs)  # type: ignore
         await self.__init__(*args, **kwargs)  # type: ignore
         return self
