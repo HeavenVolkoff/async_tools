@@ -1,15 +1,14 @@
 # Internal
+import sys
 import typing as T
 import asyncio
 import unittest
 from typing import NamedTuple
-from asyncio import Future, AbstractEventLoop
+from asyncio import Future
 from unittest.mock import Mock
 
 # External
 import asynctest
-
-# External
 from async_tools.emitter import Emitter, ListenerFutureError, ListenerExecutionError
 
 # Generic types
@@ -28,7 +27,10 @@ class MockAwaitable(Future):
 
     @property
     def callbacks(self) -> T.Sequence[T.Callable[..., T.Any]]:
-        return tuple(zip(*self._callbacks))[0]
+        if sys.version_info >= (3, 7):  # Python 3.7 added ContextVars support to Future callbacks
+            return tuple(zip(*self._callbacks))[0]
+        else:
+            return tuple(self._callbacks)
 
     @property
     def times_awaited(self) -> int:
