@@ -115,7 +115,7 @@ class _BlockingDecorator(T.Generic[L]):
                 if candidates:
                     # Candidates should be a single element tuple
                     assert len(candidates) == 1
-                    executor, = candidates
+                    (executor,) = candidates
                 else:
                     self._executor = executor = self._executor_cls()
                     loop_pool.add(executor)
