@@ -1,9 +1,9 @@
 """Work derived from cpython.
 
 Reference:
-    https://github.com/python/cpython/blob/52698c7ad9eae9feb35839fde17a7d1da8036a9b/Lib/contextlib.py
+    https://github.com/python/cpython/blob/1b293b60067f6f4a95984d064ce0f6b6d34c1216/Lib/contextlib.py
 See original licenses in:
-    https://github.com/python/cpython/blob/9a69ae8a78785105ded02b083b2e5cd2dd939307/LICENSE
+    https://github.com/python/cpython/blob/1b293b60067f6f4a95984d064ce0f6b6d34c1216/LICENSE
 """
 
 # Internal
@@ -55,14 +55,17 @@ class _BaseExitStack:
     """A base class for ExitStack and AsyncExitStack."""
 
     @staticmethod
-    def _create_cb_wrapper(
-        callback: T.Callable[..., T.Any], *args: T.Any, **kwargs: T.Any
-    ) -> ExitCallback:
+    def _create_cb_wrapper(*args: T.Any, **kwargs: T.Any) -> ExitCallback:
+        callback: T.Callable[..., T.Any]
+        callback, *args = args  # type: ignore
+
         def _exit_wrapper(exc_type: T.Any, exc_value: T.Any, traceback: T.Any) -> bool:
             callback(*args, **kwargs)
             return False
 
         return _exit_wrapper
+
+    _create_cb_wrapper.__text_signature__ = "(callback, /, *args, **kwds)"  # type: ignore
 
     def __init__(self) -> None:
         self._exit_callbacks: Te.Deque[
@@ -120,10 +123,33 @@ class _BaseExitStack:
         self._push_exit_callback(MethodType(cm_type.__exit__, cm), True)
         return result
 
-    def callback(self, callback: M, *args: T.Any, **kwargs: T.Any) -> M:
+    def callback(*args: T.Any, **kwargs: T.Any) -> M:
         """Registers an arbitrary callback and arguments.
+
         Cannot suppress exceptions.
         """
+
+        callback: M
+
+        if len(args) >= 2:
+            self, callback, *args = args  # type: ignore
+        elif not args:
+            raise TypeError("descriptor 'callback' of '_BaseExitStack' object needs an argument")
+        elif "callback" in kwargs:
+            callback = kwargs.pop("callback")
+            self, *args = args  # type: ignore
+            import warnings
+
+            warnings.warn(
+                "Python 3.8 deprecated passing 'callback' as a keyword argument",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+        else:
+            raise TypeError(
+                f"callback expected at least 1 positional argument, got {len(args) - 1}"
+            )
+
         _exit_wrapper = self._create_cb_wrapper(callback, *args, **kwargs)
 
         # We changed the signature, so using @wraps is not appropriate, but
@@ -131,6 +157,8 @@ class _BaseExitStack:
         setattr(_exit_wrapper, "__wrapped__", callback)
         self._push_exit_callback(_exit_wrapper)
         return callback  # Allow use as a decorator
+
+    callback.__text_signature__ = "($self, callback, /, *args, **kwds)"  # type: ignore
 
 
 def _fix_exception_context(
@@ -173,6 +201,8 @@ class AsyncExitStack(_BaseExitStack, Te.AsyncContextManager["AsyncExitStack"]):
             return False
 
         return _exit_wrapper
+
+    _create_async_cb_wrapper.__text_signature__ = "(callback, /, *args, **kwds)"  # type: ignore
 
     async def __aenter__(self) -> "AsyncExitStack":
         return self
@@ -286,7 +316,7 @@ class AsyncExitStack(_BaseExitStack, Te.AsyncContextManager["AsyncExitStack"]):
             import warnings
 
             warnings.warn(
-                "Passing 'callback' as keyword argument is deprecated in Python 3.8",
+                "Python 3.8 deprecated passing 'callback' as a keyword argument",
                 DeprecationWarning,
                 stacklevel=2,
             )
