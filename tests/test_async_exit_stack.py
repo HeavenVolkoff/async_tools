@@ -1,9 +1,9 @@
 """Work derived from cpython.
 
 Reference:
-    https://github.com/python/cpython/blob/1b293b60067f6f4a95984d064ce0f6b6d34c1216/Lib/test/test_contextlib_async.py
+    https://github.com/python/cpython/blob/db8e3a1e4476620b2b5aaf57acfc3ef58a08213b/Lib/test/test_contextlib_async.py
 See original licenses in:
-    https://github.com/python/cpython/blob/1b293b60067f6f4a95984d064ce0f6b6d34c1216/LICENSE
+    https://github.com/python/cpython/blob/9a69ae8a78785105ded02b083b2e5cd2dd939307/LICENSE
 """
 
 # Internal
@@ -67,6 +67,9 @@ class TestAsyncExitStack(asynctest.TestCase, unittest.TestCase):
                 self.assertIsNone(wrapper[1].__doc__, _exit.__doc__)
 
         self.assertEqual(result, expected)
+
+        with self.assertRaises(TypeError):
+            AsyncExitStack.push_async_callback()
 
         result = []
         async with AsyncExitStack() as stack:

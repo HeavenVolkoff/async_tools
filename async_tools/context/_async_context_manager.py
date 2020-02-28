@@ -1,9 +1,9 @@
 """Work derived from cpython.
 
 Reference:
-    https://github.com/python/cpython/blob/1b293b60067f6f4a95984d064ce0f6b6d34c1216/Lib/contextlib.py
+    https://github.com/python/cpython/blob/52698c7ad9eae9feb35839fde17a7d1da8036a9b/Lib/contextlib.py
 See original licenses in:
-    https://github.com/python/cpython/blob/1b293b60067f6f4a95984d064ce0f6b6d34c1216/LICENSE
+    https://github.com/python/cpython/blob/9a69ae8a78785105ded02b083b2e5cd2dd939307/LICENSE
 """
 
 # Internal

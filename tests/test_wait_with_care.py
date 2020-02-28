@@ -38,7 +38,7 @@ class WaitWithCareTestCase(asynctest.TestCase, unittest.TestCase):
         self.assertIsInstance(done, set)
         self.assertIsInstance(pending, set)
 
-        (task,) = done
+        task, = done
 
         self.assertEqual(task.result(), "done")
 
@@ -79,7 +79,7 @@ class WaitWithCareTestCase(asynctest.TestCase, unittest.TestCase):
         self.assertIsInstance(done, set)
         self.assertIsInstance(pending, set)
 
-        (cancelled_task,) = done
+        cancelled_task, = done
 
         with self.assertRaises(CancelledError):
             cancelled_task.result()

@@ -1,38 +1,65 @@
-"""Work derived from cpython.
-
-Reference:
-    https://github.com/python/cpython/blob/1b293b60067f6f4a95984d064ce0f6b6d34c1216/Lib/test/test_contextlib.py
-See original licenses in:
-    https://github.com/python/cpython/blob/1b293b60067f6f4a95984d064ce0f6b6d34c1216/LICENSE
-"""
-
 # Internal
+import asyncio
 import unittest
 from contextlib import contextmanager
 from test.support import requires_docstrings
 
 # External
-import asynctest
-
-# External
 from async_tools.context._async_exit_stack import AsyncExitStack
 
 
-@asynctest.strict
-class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
+class TestBaseExitStack(unittest.TestCase):
+    class SyncAsyncExitStack(AsyncExitStack):
+        @staticmethod
+        def run_coroutine(coro):
+            loop = asyncio.get_event_loop()
+
+            f = asyncio.ensure_future(coro)
+            f.add_done_callback(lambda f: loop.stop())
+            loop.run_forever()
+
+            exc = f.exception()
+
+            if not exc:
+                return f.result()
+            else:
+                context = exc.__context__
+
+                try:
+                    raise exc
+                except:
+                    exc.__context__ = context
+                    raise exc
+
+        def close(self):
+            return self.run_coroutine(self.aclose())
+
+        def __enter__(self):
+            return self.run_coroutine(self.__aenter__())
+
+        def __exit__(self, *exc_details):
+            return self.run_coroutine(self.__aexit__(*exc_details))
+
+    exit_stack = SyncAsyncExitStack
+
+    def setUp(self):
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+        self.addCleanup(self.loop.close)
+        self.addCleanup(asyncio.set_event_loop_policy, None)
+
     @requires_docstrings
-    @asynctest.fail_on(unused_loop=False)
     def test_instance_docs(self):
         # Issue 19330: ensure context manager instances have good docstrings
-        cm_docstring = AsyncExitStack.__doc__
-        obj = AsyncExitStack()
+        cm_docstring = self.exit_stack.__doc__
+        obj = self.exit_stack()
         self.assertEqual(obj.__doc__, cm_docstring)
 
-    async def test_no_resources(self):
-        async with AsyncExitStack():
+    def test_no_resources(self):
+        with self.exit_stack():
             pass
 
-    async def test_callback(self):
+    def test_callback(self):
         expected = [
             ((), {}),
             ((1,), {}),
@@ -40,7 +67,6 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
             ((), dict(example=1)),
             ((1,), dict(example=1)),
             ((1, 2), dict(example=1)),
-            ((1, 2), dict(self=3, callback=4)),
         ]
         result = []
 
@@ -48,7 +74,7 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
             """Test metadata propagation"""
             result.append((args, kwds))
 
-        async with AsyncExitStack() as stack:
+        with self.exit_stack() as stack:
             for args, kwds in reversed(expected):
                 if args and kwds:
                     f = stack.callback(_exit, *args, **kwds)
@@ -65,17 +91,7 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
                 self.assertIsNone(wrapper[1].__doc__, _exit.__doc__)
         self.assertEqual(result, expected)
 
-        result = []
-        async with AsyncExitStack() as stack:
-            with self.assertRaises(TypeError):
-                stack.callback(arg=1)
-            with self.assertRaises(TypeError):
-                AsyncExitStack.callback(arg=2)
-            with self.assertWarns(DeprecationWarning):
-                stack.callback(callback=_exit, arg=3)
-        self.assertEqual(result, [((), {"arg": 3})])
-
-    async def test_push(self):
+    def test_push(self):
         exc_raised = ZeroDivisionError
 
         def _expect_exc(exc_type, exc, exc_tb):
@@ -99,7 +115,7 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
             def __exit__(self, *exc_details):
                 self.check_exc(*exc_details)
 
-        async with AsyncExitStack() as stack:
+        with self.exit_stack() as stack:
             stack.push(_expect_ok)
             self.assertIs(stack._exit_callbacks[-1][1], _expect_ok)
             cm = ExitCM(_expect_ok)
@@ -116,7 +132,7 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
             self.assertIs(stack._exit_callbacks[-1][1], _expect_exc)
             1 / 0
 
-    async def test_enter_context(self):
+    def test_enter_context(self):
         class TestCM(object):
             def __enter__(self):
                 result.append(1)
@@ -126,7 +142,7 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
 
         result = []
         cm = TestCM()
-        async with AsyncExitStack() as stack:
+        with self.exit_stack() as stack:
 
             @stack.callback  # Registered first => cleaned up last
             def _exit():
@@ -138,22 +154,22 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
             result.append(2)
         self.assertEqual(result, [1, 2, 3, 4])
 
-    async def test_close(self):
+    def test_close(self):
         result = []
-        async with AsyncExitStack() as stack:
+        with self.exit_stack() as stack:
 
             @stack.callback
             def _exit():
                 result.append(1)
 
             self.assertIsNotNone(_exit)
-            await stack.aclose()
+            stack.close()
             result.append(2)
         self.assertEqual(result, [1, 2])
 
-    async def test_pop_all(self):
+    def test_pop_all(self):
         result = []
-        async with AsyncExitStack() as stack:
+        with self.exit_stack() as stack:
 
             @stack.callback
             def _exit():
@@ -163,21 +179,20 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
             new_stack = stack.pop_all()
             result.append(1)
         result.append(2)
-        await new_stack.aclose()
+        new_stack.close()
         self.assertEqual(result, [1, 2, 3])
 
-    async def test_exit_raise(self):
+    def test_exit_raise(self):
         with self.assertRaises(ZeroDivisionError):
-            async with AsyncExitStack() as stack:
+            with self.exit_stack() as stack:
                 stack.push(lambda *exc: False)
                 1 / 0
 
-    async def test_exit_suppress(self):
-        async with AsyncExitStack() as stack:
+    def test_exit_suppress(self):
+        with self.exit_stack() as stack:
             stack.push(lambda *exc: True)
             1 / 0
 
-    @asynctest.fail_on(unused_loop=False)
     def test_exit_exception_chaining_reference(self):
         # Sanity check to make sure that ExitStack chaining matches
         # actual nested with statements
@@ -231,7 +246,7 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
         self.assertIsInstance(inner_exc, ValueError)
         self.assertIsInstance(inner_exc.__context__, ZeroDivisionError)
 
-    async def test_exit_exception_chaining(self):
+    def test_exit_exception_chaining(self):
         # Ensure exception chaining matches the reference behaviour
         def raise_exc(exc):
             raise exc
@@ -244,7 +259,7 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
             return True
 
         try:
-            async with AsyncExitStack() as stack:
+            with self.exit_stack() as stack:
                 stack.callback(raise_exc, IndexError)
                 stack.callback(raise_exc, KeyError)
                 stack.callback(raise_exc, AttributeError)
@@ -263,7 +278,7 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
         self.assertIsInstance(inner_exc, ValueError)
         self.assertIsInstance(inner_exc.__context__, ZeroDivisionError)
 
-    async def test_exit_exception_non_suppressing(self):
+    def test_exit_exception_non_suppressing(self):
         # http://bugs.python.org/issue19092
         def raise_exc(exc):
             raise exc
@@ -272,7 +287,7 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
             return True
 
         try:
-            async with AsyncExitStack() as stack:
+            with self.exit_stack() as stack:
                 stack.callback(lambda: None)
                 stack.callback(raise_exc, IndexError)
         except Exception as exc:
@@ -281,7 +296,7 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
             self.fail("Expected IndexError, but no exception was raised")
 
         try:
-            async with AsyncExitStack() as stack:
+            with self.exit_stack() as stack:
                 stack.callback(raise_exc, KeyError)
                 stack.push(suppress_exc)
                 stack.callback(raise_exc, IndexError)
@@ -290,7 +305,7 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
         else:
             self.fail("Expected KeyError, but no exception was raised")
 
-    async def test_exit_exception_with_correct_context(self):
+    def test_exit_exception_with_correct_context(self):
         # http://bugs.python.org/issue20317
         @contextmanager
         def gets_the_context_right(exc):
@@ -308,7 +323,7 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
         # fix, ExitStack would try to fix it *again* and get into an
         # infinite self-referential loop
         try:
-            async with AsyncExitStack() as stack:
+            with self.exit_stack() as stack:
                 stack.enter_context(gets_the_context_right(exc4))
                 stack.enter_context(gets_the_context_right(exc3))
                 stack.enter_context(gets_the_context_right(exc2))
@@ -320,7 +335,7 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
             self.assertIs(exc.__context__.__context__.__context__, exc1)
             self.assertIsNone(exc.__context__.__context__.__context__.__context__)
 
-    async def test_exit_exception_with_existing_context(self):
+    def test_exit_exception_with_existing_context(self):
         # Addresses a lack of test coverage discovered after checking in a
         # fix for issue 20317 that still contained debugging code.
         def raise_nested(inner_exc, outer_exc):
@@ -335,7 +350,7 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
         exc4 = Exception(4)
         exc5 = Exception(5)
         try:
-            async with AsyncExitStack() as stack:
+            with self.exit_stack() as stack:
                 stack.callback(raise_nested, exc4, exc5)
                 stack.callback(raise_nested, exc2, exc3)
                 raise exc1
@@ -347,42 +362,41 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
             self.assertIs(exc.__context__.__context__.__context__.__context__, exc1)
             self.assertIsNone(exc.__context__.__context__.__context__.__context__.__context__)
 
-    async def test_body_exception_suppress(self):
+    def test_body_exception_suppress(self):
         def suppress_exc(*exc_details):
             return True
 
         try:
-            async with AsyncExitStack() as stack:
+            with self.exit_stack() as stack:
                 stack.push(suppress_exc)
                 1 / 0
         except IndexError as exc:
             self.fail("Expected no exception, got IndexError")
 
-    async def test_exit_exception_chaining_suppress(self):
-        async with AsyncExitStack() as stack:
+    def test_exit_exception_chaining_suppress(self):
+        with self.exit_stack() as stack:
             stack.push(lambda *exc: True)
             stack.push(lambda *exc: 1 / 0)
             stack.push(lambda *exc: {}[1])
 
-    async def test_excessive_nesting(self):
+    def test_excessive_nesting(self):
         # The original implementation would die with RecursionError here
-        async with AsyncExitStack() as stack:
+        with self.exit_stack() as stack:
             for i in range(10000):
                 stack.callback(int)
 
-    @asynctest.fail_on(unused_loop=False)
     def test_instance_bypass(self):
         class Example(object):
             pass
 
         cm = Example()
         cm.__exit__ = object()
-        stack = AsyncExitStack()
+        stack = self.exit_stack()
         self.assertRaises(AttributeError, stack.enter_context, cm)
         stack.push(cm)
         self.assertIs(stack._exit_callbacks[-1][1], cm)
 
-    async def test_dont_reraise_RuntimeError(self):
+    def test_dont_reraise_RuntimeError(self):
         # https://bugs.python.org/issue27122
         class UniqueException(Exception):
             pass
@@ -407,7 +421,7 @@ class TestBaseExitStack(asynctest.TestCase, unittest.TestCase):
         # The UniqueRuntimeError should be caught by second()'s exception
         # handler which chain raised a new UniqueException.
         with self.assertRaises(UniqueException) as err_ctx:
-            async with AsyncExitStack() as es_ctx:
+            with self.exit_stack() as es_ctx:
                 es_ctx.enter_context(second())
                 es_ctx.enter_context(first())
                 raise UniqueRuntimeError("please no infinite loop.")
