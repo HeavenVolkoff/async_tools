@@ -1,5 +1,3 @@
-"""Asynchronous Reactive eXtensions."""
-
 # External
 from importlib_metadata import version
 
@@ -13,6 +11,7 @@ from .wait_with_care import ALL_COMPLETED, FIRST_COMPLETED, FIRST_EXCEPTION, wai
 from .at_loop_shutdown import at_loop_shutdown
 from .get_running_loop import get_running_loop
 from .is_coroutine_function import is_coroutine_function
+from .shutdown_default_executor import shutdown_default_executor
 
 try:
     __version__: str = version(__name__)
@@ -28,13 +27,14 @@ __all__ = (
     "expires",
     "Loopable",
     "all_tasks",
-    "at_loop_shutdown",
     "current_task",
     "attempt_await",
     "ALL_COMPLETED",
+    "wait_with_care",
     "FIRST_COMPLETED",
     "FIRST_EXCEPTION",
-    "wait_with_care",
     "get_running_loop",
+    "at_loop_shutdown",
     "is_coroutine_function",
+    "shutdown_default_executor",
 )
