@@ -24,7 +24,7 @@ class ShutdownDefaultExecutorTest(unittest.TestCase):
             self.assertIsNotNone(default_executor)
             self.assertFalse(getattr(default_executor, "_shutdown", False))
 
-        loop.run_until_complete(shutdown_default_executor(loop))
+        loop.run_until_complete(shutdown_default_executor())
 
         if hasattr(loop, "_default_executor"):
             default_executor: ThreadPoolExecutor = getattr(loop, "_default_executor")

@@ -8,6 +8,9 @@ This code is a modified version of python 3.9's BaseEventLoop.shutdown_default_e
 import typing as T
 from threading import Thread
 
+# Project
+from .get_running_loop import get_running_loop
+
 if T.TYPE_CHECKING:
     # Internal
     from asyncio import Future, AbstractEventLoop
@@ -24,8 +27,10 @@ def _do_shutdown(
         loop.call_soon_threadsafe(future.set_exception, ex)
 
 
-async def shutdown_default_executor(loop: "AbstractEventLoop") -> None:
+async def shutdown_default_executor() -> None:
     """Schedule the shutdown of the default executor."""
+
+    loop = get_running_loop()
 
     og: T.Optional[T.Callable[[], T.Awaitable[None]]] = getattr(
         loop, "shutdown_default_executor", None
