@@ -1,5 +1,5 @@
 # External
-from importlib_metadata import version
+from importlib_metadata import version  # type: ignore
 
 # Project
 from .expires import Expires as expires

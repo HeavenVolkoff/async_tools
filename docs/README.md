@@ -1,2 +1,2 @@
 ## Documentation
-> Location for the project documentation
+Location of the project's documentation

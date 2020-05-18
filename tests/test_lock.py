@@ -5,6 +5,8 @@ from unittest.mock import Mock, call
 
 # External
 import asynctest
+
+# External
 from async_tools.lock import ReadLock, WriteLock, AsyncLockStack
 
 
