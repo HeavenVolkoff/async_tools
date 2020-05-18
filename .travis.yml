@@ -24,7 +24,7 @@ jobs:
         - python: '3.9-dev'
 
 before_install:
-    - set -eu
+    - set -e
     - pip --no-cache install -U pip setuptools
 
 install:
