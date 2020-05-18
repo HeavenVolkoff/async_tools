@@ -17,7 +17,7 @@ jobs:
         - python: '3.8'
           name: 'Mypy, Coverage, Test'
           script:
-              - sh -c 'mypy --python-executable="$(which python)" -p emitter'
+              - sh -c 'mypy --python-executable="$(which python)" -p async_tools'
               - time catchsegv coverage run -m unittest discover -s tests
           after_success:
               - bash <(curl -s https://codecov.io/bash)
