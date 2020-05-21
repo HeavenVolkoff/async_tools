@@ -1,4 +1,4 @@
-# Internal
+# Standard
 import sys
 import asyncio
 import unittest

@@ -6,10 +6,10 @@ See original licenses in:
     https://github.com/python/cpython/blob/9a69ae8a78785105ded02b083b2e5cd2dd939307/LICENSE
 """
 
-# Internal
-import typing as T
+# Standard
 from types import TracebackType
 from functools import wraps
+import typing as T
 
 # External
 import typing_extensions as Te

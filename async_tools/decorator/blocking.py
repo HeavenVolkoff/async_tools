@@ -6,14 +6,14 @@ See original licenses in:
     https://github.com/dabeaz/curio/blob/3d610aea866178800b1e5dbf5cfef8210418fb58/LICENSE
 """
 
-# Internal
-import typing as T
+# Standard
 from asyncio import AbstractEventLoop
 from weakref import WeakKeyDictionary
 from functools import wraps, partial
 from concurrent.futures import Executor
 from concurrent.futures.thread import ThreadPoolExecutor
 from concurrent.futures.process import ProcessPoolExecutor
+import typing as T
 
 # External
 import typing_extensions as Te

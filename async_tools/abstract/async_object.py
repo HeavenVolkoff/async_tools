@@ -8,7 +8,7 @@ See original licenses in:
     https://github.com/dabeaz/curio/blob/3d610aea866178800b1e5dbf5cfef8210418fb58/LICENSE
 """
 
-# Internal
+# Standard
 import typing as T
 import inspect
 

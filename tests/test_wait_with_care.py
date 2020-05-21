@@ -1,13 +1,11 @@
-# Internal
+# Standard
+from asyncio import CancelledError
 import asyncio
 import unittest
-from asyncio import CancelledError
-
-# External
-import asynctest
 
 # External
 from async_tools import FIRST_EXCEPTION, wait_with_care
+import asynctest
 
 
 class WaitWithCareTestCase(asynctest.TestCase, unittest.TestCase):

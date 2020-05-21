@@ -1,4 +1,4 @@
-# Internal
+# Standard
 import unittest
 
 

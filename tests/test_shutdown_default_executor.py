@@ -1,7 +1,7 @@
-# Internal
+# Standard
+from concurrent.futures.thread import ThreadPoolExecutor
 import asyncio
 import unittest
-from concurrent.futures.thread import ThreadPoolExecutor
 
 # External
 from async_tools import shutdown_default_executor

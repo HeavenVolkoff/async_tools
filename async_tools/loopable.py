@@ -1,6 +1,6 @@
-# Internal
-import typing as T
+# Standard
 from asyncio import AbstractEventLoop
+import typing as T
 
 # Project
 from .abstract import Loopable as AbstractLoopable

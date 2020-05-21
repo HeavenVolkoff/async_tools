@@ -2,7 +2,7 @@
 Modified from: https://github.com/python/cpython/pull/8895
 """
 
-# Internal
+# Standard
 import typing as T
 
 # External

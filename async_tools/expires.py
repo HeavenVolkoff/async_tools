@@ -6,11 +6,11 @@ See original licenses in:
     https://github.com/aio-libs/async-timeout/blob/master/LICENSE
 """
 
-# Internal
-import typing as T
+# Standard
 from types import TracebackType
 from asyncio import Task, Handle, TimeoutError, CancelledError
 from weakref import ReferenceType
+import typing as T
 
 # Project
 from .loopable import Loopable

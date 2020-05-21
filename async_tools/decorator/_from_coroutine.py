@@ -6,7 +6,7 @@ See original licenses in:
     https://github.com/dabeaz/curio/blob/133c1528633e65045c469c596664e89e9dd2b8a0/LICENSE
 """
 
-# Internal
+# Standard
 import inspect
 
 try:

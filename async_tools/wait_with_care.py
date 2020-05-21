@@ -1,7 +1,7 @@
-# Internal
-import typing as T
+# Standard
 from asyncio import Future, CancelledError, wait, get_event_loop
 from concurrent.futures import ALL_COMPLETED, FIRST_COMPLETED, FIRST_EXCEPTION
+import typing as T
 
 # Generic types
 K = T.TypeVar("K")

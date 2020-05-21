@@ -1,7 +1,7 @@
-# Internal
-import typing as T
+# Standard
 from asyncio import Future, AbstractEventLoop
 from collections import Counter
+import typing as T
 
 # External
 from async_tools import get_running_loop

@@ -1,7 +1,7 @@
-# Project
-# Internal
+# Standard
 import typing as T
 
+# Project
 from ._protocol import LockProtocol
 
 

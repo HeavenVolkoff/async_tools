@@ -1,6 +1,6 @@
-# Internal
-import typing as T
+# Standard
 from asyncio import AbstractEventLoop, ensure_future
+import typing as T
 
 # Project
 from .get_running_loop import get_running_loop

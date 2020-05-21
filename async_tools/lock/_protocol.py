@@ -1,4 +1,4 @@
-# Internal
+# Standard
 import typing as T
 
 # External

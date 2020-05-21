@@ -6,11 +6,11 @@ See original licenses in:
     https://github.com/dabeaz/curio/blob/3d610aea866178800b1e5dbf5cfef8210418fb58/LICENSE
 """
 
-# Internal
-import typing as T
-import inspect
+# Standard
 from types import MethodType
 from functools import partial
+import typing as T
+import inspect
 
 
 def is_coroutine_function(

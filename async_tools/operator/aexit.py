@@ -1,6 +1,6 @@
-# Internal
-import typing as T
+# Standard
 from asyncio import ALL_COMPLETED, wait
+import typing as T
 
 # External
 import typing_extensions as Te

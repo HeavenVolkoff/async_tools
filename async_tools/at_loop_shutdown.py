@@ -1,7 +1,7 @@
-# Internal
-import typing as T
+# Standard
 from asyncio import AbstractEventLoop
 from weakref import WeakKeyDictionary
+import typing as T
 
 # Project
 from .attempt_await import attempt_await

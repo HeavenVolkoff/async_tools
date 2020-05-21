@@ -6,17 +6,15 @@ See original licenses in:
     https://github.com/python/cpython/blob/9a69ae8a78785105ded02b083b2e5cd2dd939307/LICENSE
 """
 
-# Internal
+# Standard
+from test import support
 import sys
 import unittest
-from test import support
-
-# External
-import asynctest
-import typing_extensions as Te
 
 # External
 from async_tools.context._async_context_manager import asynccontextmanager
+import asynctest
+import typing_extensions as Te
 
 
 @asynctest.strict

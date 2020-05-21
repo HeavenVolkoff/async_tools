@@ -6,11 +6,11 @@ See original licenses in:
     https://github.com/python/cpython/blob/9a69ae8a78785105ded02b083b2e5cd2dd939307/LICENSE
 """
 
-# Internal
-import sys
-import typing as T
+# Standard
 from types import MethodType, TracebackType
 from collections import deque
+import sys
+import typing as T
 
 # External
 import typing_extensions as Te

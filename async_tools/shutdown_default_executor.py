@@ -4,9 +4,9 @@ This code is a modified version of python 3.9's BaseEventLoop.shutdown_default_e
 @license: https://github.com/python/cpython/blob/eb0d359b4b0e14552998e7af771a088b4fd01745/LICENSE
 """
 
-# Internal
-import typing as T
+# Standard
 from threading import Thread
+import typing as T
 
 # Project
 from .get_running_loop import get_running_loop

@@ -6,16 +6,14 @@ See original licenses in:
     https://github.com/python/cpython/blob/9a69ae8a78785105ded02b083b2e5cd2dd939307/LICENSE
 """
 
-# Internal
+# Standard
 import sys
 import unittest
 
 # External
+from async_tools.context._async_exit_stack import AsyncExitStack
 import asynctest
 import typing_extensions as Te
-
-# External
-from async_tools.context._async_exit_stack import AsyncExitStack
 
 
 @asynctest.strict

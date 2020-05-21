@@ -1,12 +1,10 @@
-# Internal
+# Standard
 import asyncio
 import unittest
 
 # External
-import asynctest
-
-# External
 from async_tools.context import aclosing
+import asynctest
 
 
 class MyTestCase(asynctest.TestCase, unittest.TestCase):

@@ -1,4 +1,4 @@
-# Internal
+# Standard
 import asyncio
 
 if hasattr(asyncio, "current_task"):

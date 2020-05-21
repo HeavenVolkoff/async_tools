@@ -1,8 +1,8 @@
-# Internal
-import asyncio
-import unittest
+# Standard
 from contextlib import contextmanager
 from test.support import requires_docstrings
+import asyncio
+import unittest
 
 # External
 from async_tools.context._async_exit_stack import AsyncExitStack

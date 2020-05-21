@@ -1,13 +1,11 @@
-# Internal
+# Standard
+from asyncio import CancelledError
 import asyncio
 import unittest
-from asyncio import CancelledError
-
-# External
-import asynctest
 
 # External
 from async_tools import expires
+import asynctest
 
 
 class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
