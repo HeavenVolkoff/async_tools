@@ -1,10 +1,9 @@
-# Standard
-from asyncio import AbstractEventLoop
+# Internal
 import typing as T
+from asyncio import AbstractEventLoop, get_running_loop
 
 # Project
 from .abstract import Loopable as AbstractLoopable
-from .get_running_loop import get_running_loop
 
 
 class Loopable(AbstractLoopable):

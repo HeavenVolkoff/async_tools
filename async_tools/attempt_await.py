@@ -1,9 +1,6 @@
-# Standard
-from asyncio import AbstractEventLoop, ensure_future
+# Internal
 import typing as T
-
-# Project
-from .get_running_loop import get_running_loop
+from asyncio import AbstractEventLoop, ensure_future, get_running_loop
 
 # Generic types
 K = T.TypeVar("K")
@@ -15,6 +12,7 @@ async def attempt_await(
     if loop is None:
         loop = get_running_loop()
     else:
+        # Internal
         from warnings import warn
 
         warn(

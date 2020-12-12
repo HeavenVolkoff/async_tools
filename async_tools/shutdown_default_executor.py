@@ -4,17 +4,11 @@ This code is a modified version of python 3.9's BaseEventLoop.shutdown_default_e
 @license: https://github.com/python/cpython/blob/eb0d359b4b0e14552998e7af771a088b4fd01745/LICENSE
 """
 
-# Standard
-from threading import Thread
+# Internal
 import typing as T
-
-# Project
-from .get_running_loop import get_running_loop
-
-if T.TYPE_CHECKING:
-    # Internal
-    from asyncio import Future, AbstractEventLoop
-    from concurrent.futures.thread import ThreadPoolExecutor
+from asyncio import Future, AbstractEventLoop, get_running_loop
+from threading import Thread
+from concurrent.futures.thread import ThreadPoolExecutor
 
 
 def _do_shutdown(

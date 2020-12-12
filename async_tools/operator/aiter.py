@@ -2,11 +2,8 @@
 Modified from: https://github.com/python/cpython/pull/8895
 """
 
-# Standard
+# Internal
 import typing as T
-
-# External
-import typing_extensions as Te
 
 # Generic types
 K = T.TypeVar("K")
@@ -47,7 +44,7 @@ def aiter(
         if isinstance(iterable, T.AsyncIterator):
             return iterable
 
-        async def to_aiter() -> Te.AsyncGenerator[K, None]:
+        async def to_aiter() -> T.AsyncGenerator[K, None]:
             assert isinstance(iterable, T.AsyncIterable)
             async for i in iterable:
                 yield i

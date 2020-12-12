@@ -6,15 +6,14 @@ See original licenses in:
     https://github.com/aio-libs/async-timeout/blob/master/LICENSE
 """
 
-# Standard
-from types import TracebackType
-from asyncio import Task, Handle, TimeoutError, CancelledError
-from weakref import ReferenceType
+# Internal
 import typing as T
+from types import TracebackType
+from asyncio import Task, Handle, TimeoutError, CancelledError, current_task
+from weakref import ReferenceType
 
 # Project
 from .loopable import Loopable
-from .current_task import current_task
 
 
 class Expires(T.ContextManager["Expires"], Loopable):

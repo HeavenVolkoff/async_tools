@@ -1,12 +1,11 @@
-# Standard
-from asyncio import AbstractEventLoop
-from weakref import WeakKeyDictionary
+# Internal
 import typing as T
+from asyncio import AbstractEventLoop, get_running_loop
+from weakref import WeakKeyDictionary
 
 # Project
 from .attempt_await import attempt_await
 from .wait_with_care import wait_with_care
-from .get_running_loop import get_running_loop
 
 
 class ShutdownCallablesMeta(type):

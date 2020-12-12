@@ -1,7 +1,10 @@
-try:
-    from contextlib import AsyncExitStack
-except ImportError:
-    from ._async_exit_stack import AsyncExitStack  # type: ignore
+# Internal
+from warnings import warn
+from contextlib import AsyncExitStack
 
+warn(
+    "async_tools.context.async_context_manager is deprecated, use contextlib instead",
+    DeprecationWarning,
+)
 
 __all__ = ("AsyncExitStack",)

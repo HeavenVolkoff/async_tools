@@ -1,17 +1,17 @@
-# Standard
+# Internal
+import typing as T
 from asyncio import Future, AbstractEventLoop
 from collections import Counter
-import typing as T
 
 # External
-from async_tools import get_running_loop
 from async_tools.context import asynccontextmanager
 
 # Project
+from ..loopable import Loopable
 from ._protocol import LockProtocol
 
 
-class AsyncLockStack:
+class AsyncLockStack(Loopable):
     """A small asyncio framework for constructing locks.
 
     This is a modified version of the following:
@@ -22,7 +22,8 @@ class AsyncLockStack:
     """
 
     def __init__(self, *, loop: T.Optional[AbstractEventLoop] = None) -> None:
-        self._loop = loop or get_running_loop()
+        super().__init__(loop=loop)
+
         self._vault: T.Counter[T.Type[LockProtocol]] = Counter()
         self._locks: T.List[T.Tuple["Future[None]", LockProtocol]] = []
 

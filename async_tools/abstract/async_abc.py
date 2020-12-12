@@ -6,18 +6,13 @@ See original licenses in:
     https://github.com/dabeaz/curio/blob/3d610aea866178800b1e5dbf5cfef8210418fb58/LICENSE
 """
 
-# Standard
+# Internal
 import typing as T
 import inspect
+from abc import ABCMeta as Meta
 
 # Project
 from ..is_coroutine_function import is_coroutine_function
-
-try:
-    # Allow easy interoperability between typing generics and AsyncABCMeta on Python <= 3.6
-    from typing import GenericMeta as Meta
-except ImportError:
-    from abc import ABCMeta as Meta  # type: ignore
 
 
 class AsyncABCMeta(Meta):

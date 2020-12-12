@@ -1,11 +1,12 @@
-# Standard
-from asyncio import CancelledError
+# Internal
 import asyncio
 import unittest
+from asyncio import CancelledError
 
 # External
-from async_tools import expires
 import asynctest
+
+from async_tools import expires
 
 
 class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
@@ -91,6 +92,7 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
 
     async def test_blocking_loop(self):
         async def long_running_task():
+            # Internal
             import time
 
             time.sleep(0.1)
@@ -296,6 +298,7 @@ class ExpiresTestCase(asynctest.TestCase, unittest.TestCase):
             exp.reset()
 
     async def test_reuse_without_task_reference(self):
+        # Internal
         from gc import collect
 
         exp = None

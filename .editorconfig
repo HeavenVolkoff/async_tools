@@ -10,31 +10,9 @@ insert_final_newline = true
 trim_trailing_whitespace = true
 
 [**.py]
+black_file=./black.toml
 indent_size = 4
 indent_style = space
-# black config
-black_file=./black.toml
-# isort config
-quiet = True
-atomic = True
-not_skip = __init__.py
-from_first = True
-line_length = 99
-length_sort = True
-combine_star = True
-order_by_type = True
-force_grid_wrap = 0
-default_section = THIRDPARTY
-use_parentheses = True
-reverse_relative = True
-multi_line_output = 3
-balanced_wrapping = True
-combine_as_imports = True
-import_heading_stdlib = Standard
-include_trailing_comma = True
-import_heading_thirdparty = External
-import_heading_firstparty = Internal
-import_heading_localfolder = Project
 
 [**.cfg]
 indent_size = 4

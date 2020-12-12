@@ -1,5 +1,5 @@
-# External
-from importlib_metadata import version  # type: ignore
+# Internal
+from importlib.metadata import version
 
 # Project
 from .expires import Expires as expires
@@ -16,6 +16,7 @@ from .shutdown_default_executor import shutdown_default_executor
 try:
     __version__: str = version(__name__)
 except Exception:  # pragma: no cover
+    # Internal
     import traceback
     from warnings import warn
 

@@ -1,7 +1,7 @@
-# Standard
-from asyncio import Future, CancelledError, wait, get_event_loop
-from concurrent.futures import ALL_COMPLETED, FIRST_COMPLETED, FIRST_EXCEPTION
+# Internal
 import typing as T
+from asyncio import Future, CancelledError, wait, iscoroutine, get_event_loop
+from concurrent.futures import ALL_COMPLETED, FIRST_COMPLETED, FIRST_EXCEPTION
 
 # Generic types
 K = T.TypeVar("K")
@@ -23,7 +23,10 @@ async def wait_with_care(
 
     assert return_when in (ALL_COMPLETED, FIRST_COMPLETED, FIRST_EXCEPTION)
 
-    done, pending = await wait(futures, return_when=return_when)
+    done, pending = await wait(
+        tuple(loop.create_task(task) if iscoroutine(task) else task for task in futures),
+        return_when=return_when,
+    )
 
     assert return_when != ALL_COMPLETED or not pending
 

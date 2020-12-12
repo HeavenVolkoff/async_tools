@@ -1,12 +1,9 @@
-# Standard
-from asyncio import ALL_COMPLETED, wait
+# Internal
 import typing as T
-
-# External
-import typing_extensions as Te
+from asyncio import ALL_COMPLETED, wait
 
 
-async def aexit(*disposables: Te.AsyncContextManager[T.Any]) -> None:
+async def aexit(*disposables: T.AsyncContextManager[T.Any]) -> None:
     """External access to AbstractAsyncContextManager __aexit__ magic method.
 
     See also: :meth:`~.abstract_async_context_manager.__aexit__`

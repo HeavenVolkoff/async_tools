@@ -1,9 +1,9 @@
-# Standard
-import asyncio
+# Internal
+from asyncio import current_task
+from warnings import warn
 
-if hasattr(asyncio, "current_task"):
-    current_task = asyncio.current_task
-else:
-    current_task = asyncio.Task.current_task
+warn(
+    "async_tools.current_task is deprecated, use asyncio.current_task instead", DeprecationWarning
+)
 
 __all__ = ("current_task",)

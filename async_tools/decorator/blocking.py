@@ -6,44 +6,26 @@ See original licenses in:
     https://github.com/dabeaz/curio/blob/3d610aea866178800b1e5dbf5cfef8210418fb58/LICENSE
 """
 
-# Standard
-from asyncio import AbstractEventLoop
-from weakref import WeakKeyDictionary
+# Internal
+import typing as T
+from sys import version_info
+from asyncio import get_running_loop
 from functools import wraps, partial
-from concurrent.futures import Executor
+from concurrent.futures import BrokenExecutor
 from concurrent.futures.thread import ThreadPoolExecutor
 from concurrent.futures.process import ProcessPoolExecutor
-import typing as T
-
-# External
-import typing_extensions as Te
 
 # Project
 from ._from_coroutine import _from_coroutine
 from ..at_loop_shutdown import at_loop_shutdown
-from ..get_running_loop import get_running_loop
 
 # Generic types
 K = T.TypeVar("K")
-L = T.TypeVar("L", bound=Executor)
+L = T.TypeVar("L", ThreadPoolExecutor, ProcessPoolExecutor)
 M = T.TypeVar("M", covariant=True)
 
 
-async def _delay_executor(
-    executor: Executor,
-    func: T.Callable[..., K],
-    args: T.Tuple[T.Any, ...],
-    kwargs: T.Dict[str, T.Any],
-) -> K:
-    loop = get_running_loop()
-
-    if kwargs:
-        return await loop.run_in_executor(executor, partial(func, *args, **kwargs))
-
-    return await loop.run_in_executor(executor, func, *args)
-
-
-class DecoratorProtocol(Te.Protocol[L, M]):
+class DecoratorProtocol(T.Protocol[L, M]):
     __decorator__: "_BlockingDecorator[L]"
 
     def __call__(self, *args: T.Any, **kwargs: T.Any) -> T.Union[T.Awaitable[M], M]:
@@ -51,26 +33,26 @@ class DecoratorProtocol(Te.Protocol[L, M]):
 
 
 class _BlockingDecorator(T.Generic[L]):
-    DEFAULT_POOL: T.MutableMapping[AbstractEventLoop, T.Set[Executor]] = WeakKeyDictionary()
+    def __init__(self, cls: T.Type[L], executor: T.Optional[T.Union[int, L]] = None):
+        self._managed = False
+        self._workers: T.Optional[int] = None
+        self._executor: T.Optional[L] = None
+        self._external = False
+        self._executor_cls: T.Type[L] = cls
 
-    def __init__(self, executor_cls: T.Type[L], executor: T.Optional[T.Union[int, L]] = None):
         if isinstance(executor, int):
-            managed = True
-            executor = executor_cls(max_workers=executor)  # type: ignore
-        else:
-            if executor:
-                managed = False
-                if not isinstance(executor, executor_cls):
-                    raise TypeError(f"Decorator executor must be a {executor_cls.__qualname__}")
-            else:
-                managed = True
-
-        self._managed = managed
-        self._executor = executor
-        self._executor_cls = executor_cls
+            self._workers = executor
+        elif isinstance(executor, cls):
+            self._external = True
+            self._executor = executor
+        elif executor is not None:
+            raise TypeError(f"Decorator executor must be a {cls.__qualname__}")
 
     @property
     def executor(self) -> T.Optional[L]:
+        if self._executor is None:
+            self._update_executor()
+            assert self._executor is not None
         return self._executor
 
     @executor.setter
@@ -80,15 +62,41 @@ class _BlockingDecorator(T.Generic[L]):
 
         self._executor = executor
 
-    def _clear_executor(self, loop: AbstractEventLoop) -> None:
-        loop_pool = self.DEFAULT_POOL[loop]
-
+    def _clear_executor(self, *, wait: bool = True) -> None:
         if self._executor:
-            if self._executor in loop_pool:
-                loop_pool.remove(self._executor)
-
-            self._executor.shutdown(wait=True)
+            if version_info >= (3, 9):
+                self._executor.shutdown(wait=wait, cancel_futures=True)  # type: ignore
+            else:
+                self._executor.shutdown(wait=wait)
             self._executor = None
+
+    def _update_executor(self) -> None:
+        self._clear_executor(wait=False)
+
+        self._executor = self._executor_cls(max_workers=self._workers)
+
+        if not self._managed:
+            at_loop_shutdown(lambda _: self._clear_executor())
+            self._managed = True
+
+    async def _exec(self, func: T.Callable[..., T.Any], *args: T.Any, **kwargs: T.Any) -> K:
+        loop = get_running_loop()
+        _break = False
+        while True:
+            try:
+                if kwargs:
+                    return await loop.run_in_executor(
+                        self._executor, partial(func, *args, **kwargs)
+                    )
+
+                return await loop.run_in_executor(self._executor, func, *args)
+            except BrokenExecutor as exc:
+                if _break:
+                    raise exc
+                _break = True
+                loop.call_exception_handler({"message": "Executor broke", "exception": exc})
+                self._update_executor()
+                continue
 
     def __call__(self, wrapped: T.Callable[..., K]) -> DecoratorProtocol[L, K]:
         @wraps(wrapped)
@@ -96,41 +104,13 @@ class _BlockingDecorator(T.Generic[L]):
             if not _from_coroutine():
                 return wrapped(*args, **kwargs)
 
-            loop = get_running_loop()
+            # _exec is called with wrapper instead of wrapped, this is to appease pickle, as it
+            # fails with UnpicklingError when _exec is called with wrapped
+            return self._exec(wrapper, *args, **kwargs)
 
-            if self._executor:
-                executor = self._executor
-            else:
-                try:
-                    loop_pool = self.DEFAULT_POOL[loop]
-                except KeyError:
-                    loop_pool = set()
+        setattr(wrapper, "__decorator__", self)
 
-                candidates = tuple(
-                    candidate
-                    for candidate in loop_pool
-                    if isinstance(candidate, self._executor_cls)
-                )
-
-                if candidates:
-                    # Candidates should be a single element tuple
-                    assert len(candidates) == 1
-                    (executor,) = candidates
-                else:
-                    self._executor = executor = self._executor_cls()
-                    loop_pool.add(executor)
-
-                if self._managed:
-                    at_loop_shutdown(self._clear_executor, loop=loop)
-                    self._managed = False
-
-                self.DEFAULT_POOL[loop] = loop_pool
-
-            return _delay_executor(executor, wrapper, args, kwargs)
-
-        wrapper.__decorator__ = self  # type: ignore
-
-        return wrapper  # type: ignore
+        return T.cast(DecoratorProtocol[L, K], wrapper)
 
 
 @T.overload
