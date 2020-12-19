@@ -1,6 +1,6 @@
 # Internal
 import typing as T
-from asyncio import Future, CancelledError, wait, iscoroutine, get_event_loop
+from asyncio import Future, wait, iscoroutine, get_event_loop
 from concurrent.futures import ALL_COMPLETED, FIRST_COMPLETED, FIRST_EXCEPTION
 
 # Generic types
@@ -31,20 +31,24 @@ async def wait_with_care(
     assert return_when != ALL_COMPLETED or not pending
 
     for fut in done:
-        try:
-            exc = fut.exception()
-        except CancelledError:
-            if ignore_cancelled:
-                continue
-            raise
+        if fut.cancelled() and ignore_cancelled:
+            continue
 
-        if exc:
+        exc = fut.exception()
+        if isinstance(exc, Exception):
             if raise_first_error:
                 raise exc
 
             loop.call_exception_handler(
-                {"message": f"Exception was raised while waiting {repr(fut)}", "exception": exc}
+                {
+                    "future": fut,
+                    "message": f"Exception was raised while waiting {repr(fut)}",
+                    "exception": exc,
+                }
             )
+        elif exc is not None:
+            # BaseExceptions
+            raise exc
 
     return done, pending
 
