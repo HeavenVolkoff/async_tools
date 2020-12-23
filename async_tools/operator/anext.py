@@ -2,14 +2,14 @@
 Modified from: https://github.com/python/cpython/pull/8895
 """
 
-# Standard
+# Internal
 import typing as T
 
 # Generic types
 K = T.TypeVar("K")
 L = T.TypeVar("L")
 
-_NOT_PROVIDED = object()  # sentinel object to detect when a kwarg was not given
+_undefined = T.cast(None, object())
 
 
 @T.overload
@@ -23,7 +23,7 @@ async def anext(async_iterator: T.AsyncGenerator[K, T.Any], default: L) -> T.Uni
 
 
 async def anext(
-    async_iterator: T.AsyncGenerator[K, T.Any], default: T.Union[L, object] = _NOT_PROVIDED
+    async_iterator: T.AsyncIterator[K], default: T.Optional[L] = _undefined
 ) -> T.Union[K, L, object]:
     """Return the next item from the async iterator.
 
@@ -40,7 +40,7 @@ async def anext(
     try:
         return await async_next()
     except StopAsyncIteration:
-        if default is _NOT_PROVIDED:
+        if default is _undefined:
             raise
 
         return default

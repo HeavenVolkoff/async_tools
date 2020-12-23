@@ -8,7 +8,7 @@ import typing as T
 # Generic types
 K = T.TypeVar("K")
 
-_NOT_PROVIDED = object()  # sentinel object to detect when a kwarg was not given
+_undefined = object()  # sentinel object to detect when a kwarg was not given
 
 
 @T.overload
@@ -23,7 +23,7 @@ def aiter(iterable: T.Callable[[], T.Awaitable[K]], sentinel: T.Any) -> T.AsyncI
 
 def aiter(
     iterable: T.Union[T.AsyncIterable[K], T.Callable[[], T.Awaitable[K]]],
-    sentinel: T.Any = _NOT_PROVIDED,
+    sentinel: T.Any = _undefined,
 ) -> T.AsyncIterator[K]:
     """Like the iter() builtin but for async iterables and callables.
 
@@ -37,7 +37,7 @@ def aiter(
         AsyncIterator for given AsyncIterable or Callable (if sentinel was also given)
 
     """
-    if sentinel is _NOT_PROVIDED:
+    if sentinel is _undefined:
         if not isinstance(iterable, T.AsyncIterable):
             raise TypeError(f"aiter expected an AsyncIterable, got {type(iterable)}")
 
